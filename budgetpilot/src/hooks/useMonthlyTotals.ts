@@ -2,6 +2,11 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
 import type { MonthlyTotals } from '../types'
 
+export function computeSavingsRate(totalIncome: number, totalExpenses: number): number {
+  if (totalIncome <= 0) return 0
+  return Math.max(0, Math.min(100, Math.round(((totalIncome - totalExpenses) / totalIncome) * 100)))
+}
+
 export function useMonthlyTotals(month: string): MonthlyTotals {
   return useLiveQuery(async () => {
     const txns = await db.transactions
@@ -17,9 +22,7 @@ export function useMonthlyTotals(month: string): MonthlyTotals {
       .reduce((sum, t) => sum + t.amount, 0)
 
     const remaining = totalIncome - totalExpenses
-    const savingsRate = totalIncome > 0
-      ? Math.round(((totalIncome - totalExpenses) / totalIncome) * 100)
-      : 0
+    const savingsRate = computeSavingsRate(totalIncome, totalExpenses)
 
     return { totalIncome, totalExpenses, remaining, savingsRate }
   }, [month], { totalIncome: 0, totalExpenses: 0, remaining: 0, savingsRate: 0 })!
