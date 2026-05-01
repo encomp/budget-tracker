@@ -124,11 +124,16 @@ export default function Import() {
         if (bank) {
           setDetectedBank(bank.bank)
           showToast(`${bank.bank} detected. Mapping applied automatically.`, 'success')
+          // Fingerprint keys are lowercase; resolve to actual CSV header names (preserving original casing)
+          const headerByNormalized: Record<string, string> = {}
+          headers.forEach((h) => { headerByNormalized[h.toLowerCase().trim()] = h })
           const bankMapping: HeuristicMapping = {
-            date: bank.mapping.date,
-            amount: bank.mapping.amount,
-            description: bank.mapping.description,
-            credit: bank.mapping.creditColumn,
+            date: headerByNormalized[bank.mapping.date] ?? bank.mapping.date,
+            amount: headerByNormalized[bank.mapping.amount] ?? bank.mapping.amount,
+            description: headerByNormalized[bank.mapping.description] ?? bank.mapping.description,
+            credit: bank.mapping.creditColumn
+              ? (headerByNormalized[bank.mapping.creditColumn] ?? bank.mapping.creditColumn)
+              : undefined,
           }
           setParsed({ headers, rows })
           setMapping(bankMapping)
