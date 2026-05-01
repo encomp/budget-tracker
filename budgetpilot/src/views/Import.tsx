@@ -107,7 +107,7 @@ export default function Import() {
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }))
 
   function processFile(file: File) {
-    if (!file.name.endsWith('.csv')) {
+    if (!file.name.toLowerCase().endsWith('.csv')) {
       showToast('Please upload a .csv file.', 'error')
       return
     }
