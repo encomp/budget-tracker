@@ -301,7 +301,7 @@ export default function Import() {
                     {field}
                   </div>
                   <BpSelect
-                    options={[{ value: '', label: 'Select column…' }, ...parsed.headers.map((h) => ({ value: h, label: h }))]}
+                    options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
                     value={mapping[field] ?? ''}
                     onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
                   />
@@ -327,7 +327,7 @@ export default function Import() {
                     </td>
                     <td style={tdStyle}>
                       <BpSelect
-                        options={[{ value: '', label: 'Select column…' }, ...parsed.headers.map((h) => ({ value: h, label: h }))]}
+                        options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
                         value={mapping[field] ?? ''}
                         onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
                       />

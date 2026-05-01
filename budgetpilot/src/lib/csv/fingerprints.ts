@@ -21,8 +21,8 @@ export const BANK_FINGERPRINTS: BankFingerprint[] = [
   },
   {
     bank: 'Bank of America',
-    headers: ['date', 'description', 'amount', 'running bal.'],
-    mapping: { date: 'date', amount: 'amount', description: 'description' },
+    headers: ['posted date', 'reference number', 'payee', 'address', 'amount'],
+    mapping: { date: 'posted date', amount: 'amount', description: 'payee' },
   },
   {
     bank: 'Wells Fargo',
