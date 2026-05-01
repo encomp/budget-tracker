@@ -9,6 +9,7 @@ export interface BpToastProps {
   visible: boolean
   onDismiss: () => void
   autoDismissMs?: number
+  action?: { label: string; onClick: () => void }
 }
 
 const accentMap: Record<BpToastVariant, string> = {
@@ -18,7 +19,7 @@ const accentMap: Record<BpToastVariant, string> = {
   bell: 'var(--bp-warning)',
 }
 
-export function BpToast({ variant, message, visible, onDismiss, autoDismissMs = 4000 }: BpToastProps) {
+export function BpToast({ variant, message, visible, onDismiss, autoDismissMs = 4000, action }: BpToastProps) {
   React.useEffect(() => {
     if (!visible) return
     const t = setTimeout(onDismiss, autoDismissMs)
@@ -52,6 +53,24 @@ export function BpToast({ variant, message, visible, onDismiss, autoDismissMs = 
     <div style={style} role="alert">
       {variant === 'bell' && <AnimatedIcon type="BellRing" size={16} />}
       <span style={{ flex: 1 }}>{message}</span>
+      {action && (
+        <button
+          onClick={() => { action.onClick(); onDismiss() }}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--bp-accent)',
+            cursor: 'pointer',
+            fontFamily: 'var(--bp-font-ui)',
+            fontSize: '13px',
+            fontWeight: 600,
+            padding: '0 8px',
+            transition: `opacity var(--bp-duration-fast) var(--bp-easing-default)`,
+          }}
+        >
+          {action.label}
+        </button>
+      )}
       <button
         onClick={onDismiss}
         style={{
@@ -75,14 +94,18 @@ export interface ToastState {
   message: string
   variant: BpToastVariant
   visible: boolean
+  action?: { label: string; onClick: () => void }
 }
 
 export function useToast() {
   const [state, setState] = React.useState<ToastState>({ message: '', variant: 'info', visible: false })
 
-  const showToast = React.useCallback((message: string, variant: BpToastVariant = 'info') => {
-    setState({ message, variant, visible: true })
-  }, [])
+  const showToast = React.useCallback(
+    (message: string, variant: BpToastVariant = 'info', action?: { label: string; onClick: () => void }) => {
+      setState({ message, variant, visible: true, action })
+    },
+    []
+  )
 
   const dismiss = React.useCallback(() => {
     setState((prev) => ({ ...prev, visible: false }))

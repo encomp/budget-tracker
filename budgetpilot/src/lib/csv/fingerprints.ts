@@ -9,8 +9,9 @@ export interface BankMapping {
 
 export interface BankFingerprint {
   bank: string
-  headers: string[]
+  headers: string[]          // normalized (lowercase) header names
   mapping: BankMapping
+  strict?: boolean           // if true: CSV must have exactly these headers, no more
 }
 
 export const BANK_FINGERPRINTS: BankFingerprint[] = [
@@ -39,9 +40,17 @@ export const BANK_FINGERPRINTS: BankFingerprint[] = [
     headers: ['transaction date', 'posted date', 'card no.', 'description', 'category', 'debit', 'credit'],
     mapping: { date: 'transaction date', amount: 'debit', description: 'description', creditColumn: 'credit' },
   },
+  // 3-column format (strict — must be exactly these 3 columns)
   {
     bank: 'American Express',
     headers: ['date', 'description', 'amount'],
+    mapping: { date: 'date', amount: 'amount', description: 'description', signInverted: true },
+    strict: true,
+  },
+  // 5-column format (older export with Card Member + Account #)
+  {
+    bank: 'American Express',
+    headers: ['date', 'description', 'card member', 'account #', 'amount'],
     mapping: { date: 'date', amount: 'amount', description: 'description', signInverted: true },
   },
   {
@@ -62,9 +71,17 @@ function normalizeHeader(h: string): string {
 
 export function detectBank(rawHeaders: string[]): BankFingerprint | null {
   const normalized = rawHeaders.map(normalizeHeader)
+  let bestMatch: BankFingerprint | null = null
+  let bestCount = 0
+
   for (const fp of BANK_FINGERPRINTS) {
-    const allMatch = fp.headers.every(h => normalized.includes(h))
-    if (allMatch) return fp
+    const allPresent = fp.headers.every(h => normalized.includes(h))
+    if (!allPresent) continue
+    if (fp.strict && normalized.length !== fp.headers.length) continue
+    if (fp.headers.length > bestCount) {
+      bestMatch = fp
+      bestCount = fp.headers.length
+    }
   }
-  return null
+  return bestMatch
 }

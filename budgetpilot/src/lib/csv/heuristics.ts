@@ -18,11 +18,11 @@ const HEURISTICS: Record<string, FieldHeuristic> = {
   },
   amount: {
     headerPatterns: [/amount/i, /debit/i, /charge/i, /withdrawal/i, /sum/i],
-    valuePattern: /^-?[\$£€]?\d+(\.\d{1,2})?$/,
+    valuePattern: /^-?[\$£€(]?[\d,]+(\.\d{1,2})?[)]?$/,
   },
   credit: {
     headerPatterns: [/credit/i, /deposit/i, /payment/i],
-    valuePattern: /^[\$£€]?\d+(\.\d{1,2})?$/,
+    valuePattern: null,  // header-only detection avoids false positives on balance columns
   },
   description: {
     headerPatterns: [/desc/i, /memo/i, /merchant/i, /payee/i, /name/i, /narrative/i],

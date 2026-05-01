@@ -12,6 +12,7 @@ import { ProfileSchema, type ProfileFormValues } from '../lib/schemas'
 import { THEME_MIDNIGHT, applyTheme, validateTheme } from '../lib/theme'
 import { getMotionConfig } from '../lib/animation'
 import { Settings as SettingsStore } from '../lib/settings'
+import { ChevronRight } from 'lucide-react'
 import { db } from '../lib/db'
 import type { BpTheme } from '../types'
 
@@ -135,8 +136,41 @@ function ThemePreviewPanel({
   )
 }
 
+const settingsRowStyle: React.CSSProperties = {
+  width: '100%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '12px 0',
+  background: 'none',
+  border: 'none',
+  borderBottom: '1px solid var(--bp-border)',
+  cursor: 'pointer',
+  textAlign: 'left',
+}
+
+const settingsRowLabelStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '2px',
+}
+
+const settingsRowTitleStyle: React.CSSProperties = {
+  fontFamily: 'var(--bp-font-ui)',
+  fontSize: '14px',
+  fontWeight: 500,
+  color: 'var(--bp-text-primary)',
+}
+
+const settingsRowSubStyle: React.CSSProperties = {
+  fontFamily: 'var(--bp-font-ui)',
+  fontSize: '12px',
+  color: 'var(--bp-text-muted)',
+}
+
 export default function Settings() {
   const setActiveTheme = useAppStore((s) => s.setActiveTheme)
+  const setActiveView = useAppStore((s) => s.setActiveView)
   const activeTheme = useAppStore((s) => s.activeTheme)
   const { toast, showToast, dismiss } = useToast()
   const [clearConfirmOpen, setClearConfirmOpen] = React.useState(false)
@@ -231,6 +265,22 @@ export default function Settings() {
             </BpButton>
           </div>
         </form>
+      </BpCard>
+
+      {/* Import Rules */}
+      <BpCard padding="md">
+        <SectionTitle>Data</SectionTitle>
+        <div style={{ marginTop: '8px' }}>
+          <button onClick={() => setActiveView('import-rules')} style={settingsRowStyle}>
+            <div style={settingsRowLabelStyle}>
+              <span style={settingsRowTitleStyle}>Import Rules</span>
+              <span style={settingsRowSubStyle}>
+                Manage category rules applied automatically during CSV import
+              </span>
+            </div>
+            <ChevronRight size={16} style={{ color: 'var(--bp-text-muted)', flexShrink: 0 }} />
+          </button>
+        </div>
       </BpCard>
 
       {/* Appearance */}

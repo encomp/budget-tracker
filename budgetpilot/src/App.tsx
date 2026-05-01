@@ -15,6 +15,7 @@ import {
   Settings as SettingsView,
   ExportImport,
 } from './views'
+import ImportRules from './views/ImportRules'
 import type { ViewName } from './types'
 import { Plus } from 'lucide-react'
 
@@ -26,6 +27,7 @@ const VIEW_MAP: Record<ViewName, React.ReactNode> = {
   debts: <Debts />,
   settings: <SettingsView />,
   'export-import': <ExportImport />,
+  'import-rules': <ImportRules />,
 }
 
 export default function App() {

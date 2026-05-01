@@ -13,9 +13,9 @@ import { BpToast, useToast } from '../components/ui/BpToast'
 import { AnimatedIcon } from '../components/ui/AnimatedIcon'
 import { detectBank } from '../lib/csv/fingerprints'
 import { heuristicMap, isMappingComplete } from '../lib/csv/heuristics'
-import { lookupCategory, hydrateCSVSeed } from '../lib/csv/categorize'
+import { normalize, hydrateCSVSeed, deriveRuleKey, buildRuleEntries, buildPreviewRows } from '../lib/csv/categorize'
 import { db } from '../lib/db'
-import type { BpTransaction } from '../types'
+import type { BpTransaction, MappedTransaction } from '../types'
 import type { HeuristicMapping } from '../lib/csv/heuristics'
 
 type Stage = 'upload' | 'map' | 'review'
@@ -23,15 +23,6 @@ type Stage = 'upload' | 'map' | 'review'
 interface ParsedCSV {
   headers: string[]
   rows: Record<string, string>[]
-}
-
-interface MappedTransaction {
-  row: Record<string, string>
-  date: string
-  amount: number
-  type: 'expense' | 'income'
-  note: string
-  categoryId: string | null
 }
 
 function Stepper({ stage }: { stage: Stage }) {
@@ -99,12 +90,28 @@ export default function Import() {
   const [mapping, setMapping] = React.useState<HeuristicMapping>({})
   const [preview, setPreview] = React.useState<MappedTransaction[]>([])
   const [categoryOverrides, setCategoryOverrides] = React.useState<Record<number, string>>({})
+  const [saveAsRule, setSaveAsRule] = React.useState<Record<number, boolean>>({})
+  const [ruleKeyOverrides, setRuleKeyOverrides] = React.useState<Record<number, string>>({})
+  const [ruleConflicts, setRuleConflicts] = React.useState<string[]>([])
   const [processing, setProcessing] = React.useState(false)
   const [importing, setImporting] = React.useState(false)
+  const [showConflictWarning, setShowConflictWarning] = React.useState(false)
+  const conflictRowRefs = React.useRef<Record<number, HTMLTableRowElement | HTMLDivElement | null>>({})
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const dropZoneRef = React.useRef<HTMLDivElement>(null)
 
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }))
+
+  // Conflict detection — runs on every change to categoryOverrides, saveAsRule, ruleKeyOverrides
+  React.useEffect(() => {
+    if (preview.length === 0) return
+    const { conflicts } = buildRuleEntries(preview, categoryOverrides, saveAsRule, ruleKeyOverrides)
+    setRuleConflicts(conflicts)
+  }, [preview, categoryOverrides, saveAsRule, ruleKeyOverrides])
+
+  const rulesToSaveCount = Object.entries(categoryOverrides).filter(
+    ([i]) => saveAsRule[Number(i)] !== false
+  ).length
 
   function processFile(file: File) {
     if (!file.name.toLowerCase().endsWith('.csv')) {
@@ -138,7 +145,7 @@ export default function Import() {
           }
           setParsed({ headers, rows })
           setMapping(bankMapping)
-          buildPreview({ headers, rows }, bankMapping)
+          buildPreview({ headers, rows }, bankMapping, bank.mapping.signInverted)
           setStage('review')
         } else {
           const heuristic = heuristicMap(headers, rows.slice(0, 5))
@@ -155,38 +162,18 @@ export default function Import() {
     })
   }
 
-  async function buildPreview(data: ParsedCSV, m: HeuristicMapping) {
+  async function buildPreview(data: ParsedCSV, m: HeuristicMapping, signInverted?: boolean) {
     if (!isMappingComplete(m)) return
     const csvMap = await db.csvCategoryMap.toArray()
     const persistedMap: Record<string, string> = {}
     csvMap.forEach((e) => { persistedMap[e.normalizedDescription] = e.categoryId })
     const seeded = hydrateCSVSeed(categories)
-
-    const items: MappedTransaction[] = data.rows.map((row) => {
-      const rawAmt = row[m.amount!] ?? '0'
-      const debitAmt = parseFloat(rawAmt.replace(/[^0-9.-]/g, '')) || 0
-      const creditAmt = m.credit ? parseFloat((row[m.credit] ?? '0').replace(/[^0-9.-]/g, '')) || 0 : 0
-      const netAmount = Math.abs(debitAmt || creditAmt)
-      // signInverted (AMEX): positive = expense, negative = income
-      // default (Chase, etc.): negative = expense, positive = income
-      const type: 'expense' | 'income' =
-        creditAmt > 0 && debitAmt === 0 ? 'income' :
-        m.signInverted ? (debitAmt > 0 ? 'expense' : 'income') :
-        (debitAmt < 0 ? 'expense' : 'income')
-      const note = row[m.description!] ?? ''
-      const catId = lookupCategory(note, persistedMap) ?? lookupCategory(note, seeded) ?? null
-
-      return {
-        row,
-        date: normalizeDate(row[m.date!] ?? ''),
-        amount: netAmount,
-        type,
-        note,
-        categoryId: catId,
-      }
-    })
+    const items = buildPreviewRows(data.rows, m, signInverted ?? false, persistedMap, seeded)
     setPreview(items)
     setCategoryOverrides({})
+    setSaveAsRule({})
+    setRuleKeyOverrides({})
+    setRuleConflicts([])
   }
 
   async function handleConfirmMapping() {
@@ -210,18 +197,62 @@ export default function Import() {
 
     await db.transactions.bulkAdd(records)
 
-    const uncatCount = records.filter((r) => r.categoryId === null).length
-    showToast(`${records.length} transactions imported. ${uncatCount > 0 ? `${uncatCount} need categorization.` : 'All categorized.'}`, 'success')
+    const { entries } = buildRuleEntries(preview, categoryOverrides, saveAsRule, ruleKeyOverrides)
+    if (entries.length > 0) {
+      await db.csvCategoryMap.bulkPut(entries)
+    }
+    const ruleMsg = entries.length > 0 ? ` · ${entries.length} rule${entries.length > 1 ? 's' : ''} saved` : ''
+    showToast(`${records.length} transactions imported${ruleMsg}`, 'success')
     setImporting(false)
     setTimeout(() => {
       setActiveView('transactions')
     }, 1200)
   }
 
+  function handleStartOver() {
+    setStage('upload')
+    setDetectedBank(null)
+    setParsed(null)
+    setPreview([])
+    setCategoryOverrides({})
+    setSaveAsRule({})
+    setRuleKeyOverrides({})
+    setRuleConflicts([])
+    setShowConflictWarning(false)
+  }
+
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     const file = e.dataTransfer.files[0]
     if (file) processFile(file)
+  }
+
+  function handleImportWithoutRules() {
+    const allFalse: Record<number, boolean> = {}
+    Object.keys(categoryOverrides).forEach((k) => { allFalse[Number(k)] = false })
+    setSaveAsRule(allFalse)
+    setShowConflictWarning(false)
+  }
+
+  function handleReviewConflicts() {
+    setShowConflictWarning(false)
+    // Find first conflicting row index and scroll to it
+    const conflictIdx = preview.findIndex((item, i) => {
+      const key = ruleKeyOverrides[i] ?? deriveRuleKey(normalize(item.note))
+      return ruleConflicts.includes(key) && categoryOverrides[i] !== undefined
+    })
+    if (conflictIdx >= 0 && conflictRowRefs.current[conflictIdx]) {
+      conflictRowRefs.current[conflictIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
+  function getRuleKey(i: number, item: MappedTransaction): string {
+    return ruleKeyOverrides[i] ?? deriveRuleKey(normalize(item.note))
+  }
+
+  function isConflictRow(i: number, item: MappedTransaction): boolean {
+    const key = getRuleKey(i, item)
+    return ruleConflicts.includes(key) && categoryOverrides[i] !== undefined && saveAsRule[i] !== false
   }
 
   const isComplete = isMappingComplete(mapping)
@@ -375,13 +406,30 @@ export default function Import() {
             />
           )}
 
+          {/* Mobile card list */}
           {isMobile && preview.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
               {preview.slice(0, 20).map((item, i) => {
                 const catId = categoryOverrides[i] ?? item.categoryId
                 const catName = catId ? categories.find((c) => c.id === catId)?.name : null
+                const hasCatOverride = categoryOverrides[i] !== undefined
+                const ruleKey = getRuleKey(i, item)
+                const isConflict = isConflictRow(i, item)
+
                 return (
-                  <div key={i} style={{ background: 'var(--bp-bg-surface-alt)', borderRadius: 'var(--bp-radius-sm)', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div
+                    key={i}
+                    ref={(el) => { conflictRowRefs.current[i] = el }}
+                    style={{
+                      background: 'var(--bp-bg-surface-alt)',
+                      borderRadius: 'var(--bp-radius-sm)',
+                      padding: '10px 12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px',
+                      borderLeft: isConflict ? '3px solid var(--bp-warning)' : undefined,
+                    }}
+                  >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-primary)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.note.slice(0, 30)}</span>
                       <span style={{ fontFamily: 'var(--bp-font-mono)', fontSize: '13px', color: item.type === 'expense' ? 'var(--bp-danger)' : 'var(--bp-positive)', flexShrink: 0, marginLeft: '8px' }}>
@@ -397,8 +445,68 @@ export default function Import() {
                       )}
                       <BpBadge variant="csv" />
                     </div>
-                    {!catId && (
-                      <BpSelect options={categoryOptions} value="" onValueChange={(v) => setCategoryOverrides((p) => ({ ...p, [i]: v }))} placeholder="Assign category…" />
+                    <BpSelect
+                      options={[{ value: '', label: catName ? 'Change category…' : 'Assign category…' }, ...categoryOptions]}
+                      value={categoryOverrides[i] ?? ''}
+                      onValueChange={(v) => setCategoryOverrides((p) => ({ ...p, [i]: v }))}
+                      placeholder={catName ? 'Change category…' : 'Assign category…'}
+                    />
+                    {/* Save-as-rule toggle — only shown when category override is set */}
+                    {hasCatOverride && (
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          overflow: 'hidden',
+                          maxHeight: hasCatOverride ? '40px' : '0',
+                          opacity: hasCatOverride ? 1 : 0,
+                          transition: 'max-height 150ms ease, opacity 150ms ease',
+                          marginTop: '2px',
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          id={`save-rule-${i}`}
+                          checked={saveAsRule[i] !== false}
+                          onChange={(e) => setSaveAsRule((p) => ({ ...p, [i]: e.target.checked }))}
+                          style={{ cursor: 'pointer', accentColor: 'var(--bp-accent)' }}
+                        />
+                        <label htmlFor={`save-rule-${i}`} style={{ fontSize: '12px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', cursor: 'pointer' }}>
+                          Save &ldquo;
+                        </label>
+                        {saveAsRule[i] !== false && (
+                          <input
+                            type="text"
+                            maxLength={30}
+                            value={ruleKey}
+                            readOnly={ruleKeyOverrides[i] === undefined}
+                            onClick={(e) => {
+                              if (ruleKeyOverrides[i] === undefined) {
+                                setRuleKeyOverrides((p) => ({ ...p, [i]: ruleKey }))
+                              }
+                              e.currentTarget.focus()
+                            }}
+                            onChange={(e) => setRuleKeyOverrides((p) => ({ ...p, [i]: e.target.value }))}
+                            onBlur={(e) => setRuleKeyOverrides((p) => ({ ...p, [i]: e.target.value.trim() || ruleKey }))}
+                            style={{
+                              background: 'transparent',
+                              border: ruleKeyOverrides[i] !== undefined ? '1px solid var(--bp-accent)' : 'none',
+                              borderRadius: 'var(--bp-radius-sm)',
+                              color: 'var(--bp-text-muted)',
+                              fontFamily: 'var(--bp-font-ui)',
+                              fontSize: '12px',
+                              padding: ruleKeyOverrides[i] !== undefined ? '2px 4px' : '0',
+                              outline: 'none',
+                              cursor: ruleKeyOverrides[i] === undefined ? 'pointer' : 'text',
+                              maxWidth: '120px',
+                            }}
+                          />
+                        )}
+                        <label htmlFor={`save-rule-${i}`} style={{ fontSize: '12px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', cursor: 'pointer' }}>
+                          &rdquo; as a rule
+                        </label>
+                      </div>
                     )}
                   </div>
                 )
@@ -406,6 +514,7 @@ export default function Import() {
             </div>
           )}
 
+          {/* Desktop table */}
           {!isMobile && preview.length > 0 && (
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -422,19 +531,90 @@ export default function Import() {
                   {preview.map((item, i) => {
                     const catId = categoryOverrides[i] ?? item.categoryId
                     const catName = catId ? categories.find((c) => c.id === catId)?.name : null
+                    const hasCatOverride = categoryOverrides[i] !== undefined
+                    const ruleKey = getRuleKey(i, item)
+                    const isConflict = isConflictRow(i, item)
+
                     return (
-                      <tr key={i}>
+                      <tr
+                        key={i}
+                        ref={(el) => { conflictRowRefs.current[i] = el }}
+                        style={{ borderLeft: isConflict ? '3px solid var(--bp-warning)' : undefined }}
+                      >
                         <td style={tdStyle}>{item.date}</td>
                         <td style={{ ...tdStyle, maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.note.slice(0, 30)}</td>
                         <td style={tdStyle}>
-                          {catName ? (
-                            <BpBadge variant="default">{catName}</BpBadge>
-                          ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <BpBadge variant="warning">Uncategorized</BpBadge>
-                              <BpSelect options={categoryOptions} value="" onValueChange={(v) => setCategoryOverrides((p) => ({ ...p, [i]: v }))} placeholder="Assign…" />
+                              {catName ? (
+                                <BpBadge variant="default">{catName}</BpBadge>
+                              ) : (
+                                <BpBadge variant="warning">Uncategorized</BpBadge>
+                              )}
+                              <BpSelect
+                                options={[{ value: '', label: catName ? 'Change…' : 'Assign…' }, ...categoryOptions]}
+                                value={categoryOverrides[i] ?? ''}
+                                onValueChange={(v) => setCategoryOverrides((p) => ({ ...p, [i]: v }))}
+                                placeholder={catName ? 'Change…' : 'Assign…'}
+                              />
                             </div>
-                          )}
+                            {/* Save-as-rule toggle */}
+                            {hasCatOverride && (
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  maxHeight: hasCatOverride ? '28px' : '0',
+                                  overflow: 'hidden',
+                                  opacity: hasCatOverride ? 1 : 0,
+                                  transition: 'max-height 150ms ease, opacity 150ms ease',
+                                }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  id={`save-rule-desktop-${i}`}
+                                  checked={saveAsRule[i] !== false}
+                                  onChange={(e) => setSaveAsRule((p) => ({ ...p, [i]: e.target.checked }))}
+                                  style={{ cursor: 'pointer', accentColor: 'var(--bp-accent)' }}
+                                />
+                                <label htmlFor={`save-rule-desktop-${i}`} style={{ fontSize: '12px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                                  Save &ldquo;
+                                </label>
+                                {saveAsRule[i] !== false && (
+                                  <input
+                                    type="text"
+                                    maxLength={30}
+                                    value={ruleKey}
+                                    readOnly={ruleKeyOverrides[i] === undefined}
+                                    onClick={(e) => {
+                                      if (ruleKeyOverrides[i] === undefined) {
+                                        setRuleKeyOverrides((p) => ({ ...p, [i]: ruleKey }))
+                                      }
+                                      e.currentTarget.focus()
+                                    }}
+                                    onChange={(e) => setRuleKeyOverrides((p) => ({ ...p, [i]: e.target.value }))}
+                                    onBlur={(e) => setRuleKeyOverrides((p) => ({ ...p, [i]: e.target.value.trim() || ruleKey }))}
+                                    style={{
+                                      background: 'transparent',
+                                      border: ruleKeyOverrides[i] !== undefined ? '1px solid var(--bp-accent)' : 'none',
+                                      borderRadius: 'var(--bp-radius-sm)',
+                                      color: 'var(--bp-text-muted)',
+                                      fontFamily: 'var(--bp-font-ui)',
+                                      fontSize: '12px',
+                                      padding: ruleKeyOverrides[i] !== undefined ? '2px 4px' : '0',
+                                      outline: 'none',
+                                      cursor: ruleKeyOverrides[i] === undefined ? 'pointer' : 'text',
+                                      maxWidth: '140px',
+                                    }}
+                                  />
+                                )}
+                                <label htmlFor={`save-rule-desktop-${i}`} style={{ fontSize: '12px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                                  &rdquo; as a rule
+                                </label>
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td style={{ ...tdStyle, textAlign: 'right', fontFamily: 'var(--bp-font-mono)', color: item.type === 'expense' ? 'var(--bp-danger)' : 'var(--bp-positive)' }}>
                           {item.type === 'expense' ? '-' : '+'}${item.amount.toFixed(2)}
@@ -448,13 +628,50 @@ export default function Import() {
             </div>
           )}
 
-          <div style={{ marginTop: '16px', display: 'flex', justifyContent: isMobile ? 'stretch' : 'flex-end', gap: '8px' }}>
-            <BpButton variant="ghost" onClick={() => { setStage('upload'); setDetectedBank(null); setParsed(null); setPreview([]) }}>
-              Start Over
-            </BpButton>
-            <BpButton variant="primary" loading={importing} onClick={handleImport}>
-              {importing ? '' : `Import ${preview.length} Transactions`}
-            </BpButton>
+          {/* Summary counter + action buttons */}
+          <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* Conflict warning */}
+            {showConflictWarning && ruleConflicts.length > 0 && (
+              <div style={{ background: 'var(--bp-bg-surface-alt)', border: '1px solid var(--bp-warning)', borderRadius: 'var(--bp-radius-md)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-warning)', fontWeight: 600 }}>
+                  ⚠ {ruleConflicts.length} rule conflict{ruleConflicts.length > 1 ? 's' : ''} detected: {ruleConflicts.map(k => `"${k}"`).join(', ')}
+                </div>
+                <div style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '12px', color: 'var(--bp-text-secondary)' }}>
+                  Two rows map the same keyword to different categories.
+                </div>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <BpButton variant="secondary" size="sm" onClick={handleReviewConflicts}>Review Conflicts</BpButton>
+                  <BpButton variant="ghost" size="sm" onClick={handleImportWithoutRules}>Import without saving rules</BpButton>
+                  <BpButton variant="ghost" size="sm" onClick={() => setShowConflictWarning(false)}>Cancel</BpButton>
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'stretch' : 'space-between', gap: '8px', flexWrap: 'wrap' }}>
+              {rulesToSaveCount > 0 && (
+                <span style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-muted)' }}>
+                  {preview.length} transactions · {rulesToSaveCount} rule{rulesToSaveCount > 1 ? 's' : ''} will be saved
+                </span>
+              )}
+              <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+                <BpButton variant="ghost" onClick={handleStartOver}>
+                  Start Over
+                </BpButton>
+                <BpButton
+                  variant="primary"
+                  loading={importing}
+                  onClick={() => {
+                    if (ruleConflicts.length > 0) {
+                      setShowConflictWarning(true)
+                    } else {
+                      handleImport()
+                    }
+                  }}
+                >
+                  {importing ? '' : `Import ${preview.length} Transactions`}
+                </BpButton>
+              </div>
+            </div>
           </div>
         </BpCard>
       )}

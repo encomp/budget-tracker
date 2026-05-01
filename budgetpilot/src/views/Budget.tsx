@@ -327,6 +327,7 @@ export default function Budget() {
       categories: (current.categories ?? []).filter((c) => c.id !== id),
       categoryLimits: (current.categoryLimits ?? []).filter((cl) => cl.categoryId !== id),
     })
+    await db.csvCategoryMap.where('categoryId').equals(id).delete()
   }
 
   async function handleLimitChange(categoryId: string, limit: number) {

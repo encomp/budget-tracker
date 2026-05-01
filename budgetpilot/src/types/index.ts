@@ -9,6 +9,7 @@ export type ViewName =
   | 'debts'
   | 'settings'
   | 'export-import'
+  | 'import-rules'
 
 export interface BpProfile {
   id?: number
@@ -71,8 +72,18 @@ export interface BpTheme {
 }
 
 export interface BpCsvCategoryMap {
-  normalizedDescription: string
+  normalizedDescription: string  // primary key
   categoryId: string
+  createdAt?: number             // ms timestamp — undefined for pre-existing entries
+}
+
+export interface MappedTransaction {
+  row: Record<string, string>
+  date: string
+  amount: number
+  type: 'expense' | 'income'
+  note: string
+  categoryId: string | null
 }
 
 // Derived / computed types used by hooks
