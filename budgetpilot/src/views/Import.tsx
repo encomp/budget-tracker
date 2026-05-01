@@ -107,7 +107,7 @@ export default function Import() {
   const categoryOptions = categories.map((c) => ({ value: c.id, label: c.name }))
 
   function processFile(file: File) {
-    if (!file.name.endsWith('.csv')) {
+    if (!file.name.toLowerCase().endsWith('.csv')) {
       showToast('Please upload a .csv file.', 'error')
       return
     }
@@ -124,11 +124,17 @@ export default function Import() {
         if (bank) {
           setDetectedBank(bank.bank)
           showToast(`${bank.bank} detected. Mapping applied automatically.`, 'success')
+          // Fingerprint keys are lowercase; resolve to actual CSV header names (preserving original casing)
+          const headerByNormalized: Record<string, string> = {}
+          headers.forEach((h) => { headerByNormalized[h.toLowerCase().trim()] = h })
           const bankMapping: HeuristicMapping = {
-            date: bank.mapping.date,
-            amount: bank.mapping.amount,
-            description: bank.mapping.description,
-            credit: bank.mapping.creditColumn,
+            date: headerByNormalized[bank.mapping.date] ?? bank.mapping.date,
+            amount: headerByNormalized[bank.mapping.amount] ?? bank.mapping.amount,
+            description: headerByNormalized[bank.mapping.description] ?? bank.mapping.description,
+            credit: bank.mapping.creditColumn
+              ? (headerByNormalized[bank.mapping.creditColumn] ?? bank.mapping.creditColumn)
+              : undefined,
+            signInverted: bank.mapping.signInverted,
           }
           setParsed({ headers, rows })
           setMapping(bankMapping)
@@ -161,7 +167,12 @@ export default function Import() {
       const debitAmt = parseFloat(rawAmt.replace(/[^0-9.-]/g, '')) || 0
       const creditAmt = m.credit ? parseFloat((row[m.credit] ?? '0').replace(/[^0-9.-]/g, '')) || 0 : 0
       const netAmount = Math.abs(debitAmt || creditAmt)
-      const type: 'expense' | 'income' = creditAmt > 0 && debitAmt === 0 ? 'income' : debitAmt < 0 ? 'income' : 'expense'
+      // signInverted (AMEX): positive = expense, negative = income
+      // default (Chase, etc.): negative = expense, positive = income
+      const type: 'expense' | 'income' =
+        creditAmt > 0 && debitAmt === 0 ? 'income' :
+        m.signInverted ? (debitAmt > 0 ? 'expense' : 'income') :
+        (debitAmt < 0 ? 'expense' : 'income')
       const note = row[m.description!] ?? ''
       const catId = lookupCategory(note, persistedMap) ?? lookupCategory(note, seeded) ?? null
 
@@ -290,7 +301,7 @@ export default function Import() {
                     {field}
                   </div>
                   <BpSelect
-                    options={[{ value: '', label: 'Select column…' }, ...parsed.headers.map((h) => ({ value: h, label: h }))]}
+                    options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
                     value={mapping[field] ?? ''}
                     onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
                   />
@@ -316,7 +327,7 @@ export default function Import() {
                     </td>
                     <td style={tdStyle}>
                       <BpSelect
-                        options={[{ value: '', label: 'Select column…' }, ...parsed.headers.map((h) => ({ value: h, label: h }))]}
+                        options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
                         value={mapping[field] ?? ''}
                         onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
                       />

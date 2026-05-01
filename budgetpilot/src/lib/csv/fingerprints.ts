@@ -3,6 +3,8 @@ export interface BankMapping {
   amount: string
   description: string
   creditColumn?: string
+  // true = positive amounts are expenses (AMEX convention); false/absent = negative amounts are expenses (Chase, etc.)
+  signInverted?: boolean
 }
 
 export interface BankFingerprint {
@@ -19,8 +21,8 @@ export const BANK_FINGERPRINTS: BankFingerprint[] = [
   },
   {
     bank: 'Bank of America',
-    headers: ['date', 'description', 'amount', 'running bal.'],
-    mapping: { date: 'date', amount: 'amount', description: 'description' },
+    headers: ['posted date', 'reference number', 'payee', 'address', 'amount'],
+    mapping: { date: 'posted date', amount: 'amount', description: 'payee' },
   },
   {
     bank: 'Wells Fargo',
@@ -40,7 +42,7 @@ export const BANK_FINGERPRINTS: BankFingerprint[] = [
   {
     bank: 'American Express',
     headers: ['date', 'description', 'amount'],
-    mapping: { date: 'date', amount: 'amount', description: 'description' },
+    mapping: { date: 'date', amount: 'amount', description: 'description', signInverted: true },
   },
   {
     bank: 'Discover',

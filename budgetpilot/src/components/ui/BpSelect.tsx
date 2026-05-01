@@ -56,7 +56,7 @@ export function BpSelect({ options, value, onValueChange, placeholder, disabled,
       <SelectPrimitive.Portal>
         <SelectPrimitive.Content style={contentStyle} position="popper" sideOffset={4}>
           <SelectPrimitive.Viewport>
-            {options.map((opt) => (
+            {options.filter((opt) => opt.value !== '').map((opt) => (
               <SelectPrimitive.Item
                 key={opt.value}
                 value={opt.value}

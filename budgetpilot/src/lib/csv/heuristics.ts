@@ -3,6 +3,7 @@ export interface HeuristicMapping {
   amount?: string
   description?: string
   credit?: string
+  signInverted?: boolean
 }
 
 interface FieldHeuristic {
