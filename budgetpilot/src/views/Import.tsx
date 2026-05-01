@@ -134,6 +134,7 @@ export default function Import() {
             credit: bank.mapping.creditColumn
               ? (headerByNormalized[bank.mapping.creditColumn] ?? bank.mapping.creditColumn)
               : undefined,
+            signInverted: bank.mapping.signInverted,
           }
           setParsed({ headers, rows })
           setMapping(bankMapping)
@@ -166,7 +167,12 @@ export default function Import() {
       const debitAmt = parseFloat(rawAmt.replace(/[^0-9.-]/g, '')) || 0
       const creditAmt = m.credit ? parseFloat((row[m.credit] ?? '0').replace(/[^0-9.-]/g, '')) || 0 : 0
       const netAmount = Math.abs(debitAmt || creditAmt)
-      const type: 'expense' | 'income' = creditAmt > 0 && debitAmt === 0 ? 'income' : debitAmt < 0 ? 'income' : 'expense'
+      // signInverted (AMEX): positive = expense, negative = income
+      // default (Chase, etc.): negative = expense, positive = income
+      const type: 'expense' | 'income' =
+        creditAmt > 0 && debitAmt === 0 ? 'income' :
+        m.signInverted ? (debitAmt > 0 ? 'expense' : 'income') :
+        (debitAmt < 0 ? 'expense' : 'income')
       const note = row[m.description!] ?? ''
       const catId = lookupCategory(note, persistedMap) ?? lookupCategory(note, seeded) ?? null
 
