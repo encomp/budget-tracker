@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type { BpTheme } from '../types'
 import { Settings } from './settings'
 import { BUNDLED_THEME_IDS } from './themes'
+import { validateThemeContrast, type ContrastResult } from './contrast'
 
 export { THEME_MIDNIGHT } from './themes'
 export { THEME_FOCUS } from './themes'
@@ -101,4 +102,24 @@ export function validateTheme(json: unknown): BpTheme | null {
   }
 
   return theme
+}
+
+export interface ThemeValidationResult {
+  theme: BpTheme | null
+  contrastWarnings: ContrastResult[]
+}
+
+/**
+ * Validates theme structure AND contrast.
+ * Returns the theme even if contrast fails — contrast warnings are
+ * surfaced in the UI but do not block the user from applying.
+ */
+export function validateThemeFull(json: unknown): ThemeValidationResult {
+  const theme = validateTheme(json)
+  if (!theme) return { theme: null, contrastWarnings: [] }
+
+  const contrastResults = validateThemeContrast(theme.tokens)
+  const contrastWarnings = contrastResults.filter(r => !r.passes)
+
+  return { theme, contrastWarnings }
 }

@@ -12,10 +12,11 @@ import { BpConfirmDialog } from '../components/ui/BpConfirmDialog'
 import { BpToast, useToast } from '../components/ui/BpToast'
 import { ThemeIcon } from '../components/ThemeIcon'
 import { ProfileSchema, type ProfileFormValues } from '../lib/schemas'
-import { THEME_MIDNIGHT, applyTheme, validateTheme } from '../lib/theme'
+import { THEME_MIDNIGHT, applyTheme, validateThemeFull } from '../lib/theme'
 import { BUNDLED_THEMES } from '../lib/themes'
 import { ThemeLibrary } from '../lib/settings'
 import { SUPPORTED_LOCALES } from '../lib/i18n'
+import type { ContrastResult } from '../lib/contrast'
 import { extractFontName } from '../lib/themeUtils'
 import { getMotionConfig } from '../lib/animation'
 import { ChevronRight } from 'lucide-react'
@@ -167,15 +168,18 @@ function ThemeCard({
 
 function ThemePreviewPanel({
   theme,
+  contrastWarnings,
   onSaveToLibrary,
   onSaveAndApply,
   onCancel,
 }: {
   theme: BpTheme
+  contrastWarnings: ContrastResult[]
   onSaveToLibrary: () => void
   onSaveAndApply: () => void
   onCancel: () => void
 }) {
+  const { t } = useTranslation()
   const panelRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
@@ -255,6 +259,41 @@ function ThemePreviewPanel({
         ))}
       </div>
 
+      {/* Contrast warnings — non-blocking */}
+      {contrastWarnings.length > 0 && (
+        <div
+          data-testid="theme-contrast-warning"
+          style={{
+            background: 'rgba(234,179,8,0.1)',
+            border: '1px solid rgba(234,179,8,0.4)',
+            borderRadius: 'var(--bp-radius-sm)',
+            padding: '10px 12px',
+            fontSize: '12px',
+            color: 'var(--bp-warning)',
+            fontFamily: 'var(--bp-font-ui)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}
+        >
+          <div style={{ fontWeight: 600 }}>
+            {t('theme.contrastWarning', { count: contrastWarnings.length })}
+          </div>
+          {contrastWarnings.map((w) => (
+            <div key={w.pair} style={{ opacity: 0.85 }}>
+              {t('theme.contrastWarningDetail', {
+                pair: w.pair,
+                ratio: w.ratio?.toFixed(2) ?? '?',
+                threshold: w.threshold.toFixed(1),
+              })}
+            </div>
+          ))}
+          <div style={{ opacity: 0.7, marginTop: '2px' }}>
+            {t('theme.contrastWarningStillApply')}
+          </div>
+        </div>
+      )}
+
       {/* Three-button footer */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         <BpButton variant="primary" onClick={onSaveAndApply} data-testid="theme-save-and-apply-button">
@@ -319,6 +358,7 @@ export default function Settings() {
   const { toast, showToast, dismiss } = useToast()
   const [clearConfirmOpen, setClearConfirmOpen] = React.useState(false)
   const [pendingTheme, setPendingTheme] = React.useState<BpTheme | null>(null)
+  const [pendingContrastWarnings, setPendingContrastWarnings] = React.useState<ContrastResult[]>([])
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const dropZoneRef = React.useRef<HTMLDivElement>(null)
 
@@ -352,12 +392,13 @@ export default function Settings() {
     reader.onload = (e) => {
       try {
         const parsed = JSON.parse(e.target?.result as string)
-        const validated = validateTheme(parsed)
-        if (!validated) {
+        const { theme, contrastWarnings } = validateThemeFull(parsed)
+        if (!theme) {
           showToast('Invalid theme file. Missing required tokens or reserved ID.', 'error')
           return
         }
-        setPendingTheme(validated)
+        setPendingTheme(theme)
+        setPendingContrastWarnings(contrastWarnings)
       } catch {
         showToast('Invalid theme file. Missing required tokens or reserved ID.', 'error')
       }
@@ -542,9 +583,10 @@ export default function Settings() {
         {pendingTheme && (
           <ThemePreviewPanel
             theme={pendingTheme}
+            contrastWarnings={pendingContrastWarnings}
             onSaveToLibrary={handleSaveToLibrary}
             onSaveAndApply={handleSaveAndApply}
-            onCancel={() => setPendingTheme(null)}
+            onCancel={() => { setPendingTheme(null); setPendingContrastWarnings([]) }}
           />
         )}
       </BpCard>
