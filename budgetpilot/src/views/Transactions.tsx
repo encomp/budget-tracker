@@ -139,7 +139,7 @@ export default function Transactions() {
 
       {/* Content */}
       {isMobile ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div data-testid="transactions-table" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {filtered.length === 0 ? <EmptyState /> : filtered.map((t) => (
             <SwipeCard
               key={t.id}
@@ -172,6 +172,7 @@ export default function Transactions() {
         onOpenChange={(open) => { setModalOpen(open); if (!open) setEditTxn(undefined) }}
         activeMonth={activeMonth}
         editTransaction={editTxn}
+        testId="transaction-modal"
       />
 
       <BpConfirmDialog
@@ -303,7 +304,7 @@ function TxnTable({
       </thead>
       <tbody>
         {txns.map((t) => (
-          <tr key={t.id} data-testid="transaction-row">
+          <tr key={t.id} data-testid="transaction-row" onClick={() => onEdit(t)} style={{ cursor: 'pointer' }}>
             <td style={tdStyle}>{t.date}</td>
             <td style={tdStyle}>
               {t.categoryId === null ? (

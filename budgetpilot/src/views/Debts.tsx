@@ -173,6 +173,11 @@ export default function Debts() {
     [debts, extraPayment, method]
   )
 
+  const sortedDebts = React.useMemo(() => {
+    if (method === 'snowball') return [...debts].sort((a, b) => a.balance - b.balance)
+    return [...debts].sort((a, b) => b.apr - a.apr)
+  }, [debts, method])
+
   const totalDebt = debts.reduce((s, d) => s + d.balance, 0)
   const sliderMax = Math.max(500, Math.round(totalDebt * 0.1 / 25) * 25)
 
@@ -281,7 +286,7 @@ export default function Debts() {
         paddingRight: isDesktop ? '4px' : undefined,
       }}
     >
-      {debts.map((debt) => (
+      {sortedDebts.map((debt) => (
         <BpCard key={debt.id} padding="sm" data-testid={`debt-card-${debt.id}`}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

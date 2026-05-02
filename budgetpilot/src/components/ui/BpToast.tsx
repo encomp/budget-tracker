@@ -45,8 +45,9 @@ export function BpToast({ variant, message, visible, onDismiss, autoDismissMs = 
     maxWidth: '360px',
     transform: visible ? 'translateY(0)' : 'translateY(16px)',
     opacity: visible ? 1 : 0,
+    visibility: visible ? 'visible' : 'hidden',
     pointerEvents: visible ? 'auto' : 'none',
-    transition: `transform var(--bp-duration-normal) var(--bp-easing-spring), opacity var(--bp-duration-normal) var(--bp-easing-spring)`,
+    transition: `transform var(--bp-duration-normal) var(--bp-easing-spring), opacity var(--bp-duration-normal) var(--bp-easing-spring), visibility var(--bp-duration-normal)`,
   }
 
   return (
