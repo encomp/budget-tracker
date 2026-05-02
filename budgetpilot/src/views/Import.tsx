@@ -269,7 +269,15 @@ export default function Import() {
 
       {/* Detected bank toast banner */}
       {detectedBank && (
-        <div data-testid="toast-bank-detected" style={{ background: 'var(--bp-bg-surface)', border: '1px solid var(--bp-border)', borderLeft: '4px solid var(--bp-positive)', borderRadius: 'var(--bp-radius-md)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div
+          data-testid={
+            detectedBank.toLowerCase().includes('amex') || detectedBank.toLowerCase().includes('american express')
+              ? 'toast-bank-amex'
+              : detectedBank.toLowerCase().includes('citi')
+              ? 'toast-bank-citi'
+              : 'toast-bank-detected'
+          }
+          style={{ background: 'var(--bp-bg-surface)', border: '1px solid var(--bp-border)', borderLeft: '4px solid var(--bp-positive)', borderRadius: 'var(--bp-radius-md)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CheckCircle size={16} style={{ color: 'var(--bp-positive)', flexShrink: 0 }} />
           <span style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-primary)' }}>
             {detectedBank} detected. Mapping applied automatically.
@@ -471,6 +479,7 @@ export default function Import() {
                         <input
                           type="checkbox"
                           id={`save-rule-${i}`}
+                          data-testid={`import-rule-toggle-${i}`}
                           checked={saveAsRule[i] !== false}
                           onChange={(e) => setSaveAsRule((p) => ({ ...p, [i]: e.target.checked }))}
                           style={{ cursor: 'pointer', accentColor: 'var(--bp-accent)' }}
@@ -482,6 +491,7 @@ export default function Import() {
                           <input
                             type="text"
                             maxLength={30}
+                            data-testid={`import-rule-key-${i}`}
                             value={ruleKey}
                             readOnly={ruleKeyOverrides[i] === undefined}
                             onClick={(e) => {
@@ -578,6 +588,7 @@ export default function Import() {
                                 <input
                                   type="checkbox"
                                   id={`save-rule-desktop-${i}`}
+                                  data-testid={`import-rule-toggle-${i}`}
                                   checked={saveAsRule[i] !== false}
                                   onChange={(e) => setSaveAsRule((p) => ({ ...p, [i]: e.target.checked }))}
                                   style={{ cursor: 'pointer', accentColor: 'var(--bp-accent)' }}
@@ -589,6 +600,7 @@ export default function Import() {
                                   <input
                                     type="text"
                                     maxLength={30}
+                                    data-testid={`import-rule-key-${i}`}
                                     value={ruleKey}
                                     readOnly={ruleKeyOverrides[i] === undefined}
                                     onClick={(e) => {
@@ -636,7 +648,7 @@ export default function Import() {
           <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {/* Conflict warning */}
             {showConflictWarning && ruleConflicts.length > 0 && (
-              <div style={{ background: 'var(--bp-bg-surface-alt)', border: '1px solid var(--bp-warning)', borderRadius: 'var(--bp-radius-md)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div data-testid="import-conflict-panel" style={{ background: 'var(--bp-bg-surface-alt)', border: '1px solid var(--bp-warning)', borderRadius: 'var(--bp-radius-md)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-warning)', fontWeight: 600 }}>
                   ⚠ {ruleConflicts.length} rule conflict{ruleConflicts.length > 1 ? 's' : ''} detected: {ruleConflicts.map(k => `"${k}"`).join(', ')}
                 </div>
@@ -644,8 +656,8 @@ export default function Import() {
                   Two rows map the same keyword to different categories.
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <BpButton variant="secondary" size="sm" onClick={handleReviewConflicts}>Review Conflicts</BpButton>
-                  <BpButton variant="ghost" size="sm" onClick={handleImportWithoutRules}>Import without saving rules</BpButton>
+                  <BpButton variant="secondary" size="sm" onClick={handleReviewConflicts} data-testid="import-conflict-review">Review Conflicts</BpButton>
+                  <BpButton variant="ghost" size="sm" onClick={handleImportWithoutRules} data-testid="import-without-rules">Import without saving rules</BpButton>
                   <BpButton variant="ghost" size="sm" onClick={() => setShowConflictWarning(false)}>Cancel</BpButton>
                 </div>
               </div>
@@ -653,12 +665,12 @@ export default function Import() {
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'stretch' : 'space-between', gap: '8px', flexWrap: 'wrap' }}>
               {rulesToSaveCount > 0 && (
-                <span style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-muted)' }}>
+                <span data-testid="import-rule-count-summary" style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-muted)' }}>
                   {preview.length} transactions · {rulesToSaveCount} rule{rulesToSaveCount > 1 ? 's' : ''} will be saved
                 </span>
               )}
               <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
-                <BpButton variant="ghost" onClick={handleStartOver}>
+                <BpButton variant="ghost" onClick={handleStartOver} data-testid="import-start-over">
                   Start Over
                 </BpButton>
                 <BpButton

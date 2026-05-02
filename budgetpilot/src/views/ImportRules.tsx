@@ -168,7 +168,7 @@ export default function ImportRules() {
     const allSelected = filtered.length > 0 && selected.size === filtered.length
 
     return (
-      <div style={{ overflowX: 'auto' }}>
+      <div data-testid="import-rules-list" style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--bp-border)' }}>
@@ -188,7 +188,7 @@ export default function ImportRules() {
           <tbody>
             {/* Add row */}
             {addForm !== null && (
-              <tr style={{ background: 'var(--bp-bg-surface-alt)' }}>
+              <tr data-testid="import-rules-add-form" style={{ background: 'var(--bp-bg-surface-alt)' }}>
                 <td style={tdStyle} />
                 <td style={tdStyle}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -197,17 +197,19 @@ export default function ImportRules() {
                       type="text"
                       maxLength={30}
                       placeholder="Keyword…"
+                      data-testid="import-rules-add-keyword"
                       value={addForm.keyword}
                       onChange={(e) => setAddForm(f => f ? { ...f, keyword: e.target.value } : f)}
                       style={inlineInputStyle}
                     />
                     {addForm.keyword && getDuplicateWarning(addForm.keyword, null) && (
-                      <span style={warningStyle}>{getDuplicateWarning(addForm.keyword, null)}</span>
+                      <span data-testid="import-rules-duplicate-warning" style={warningStyle}>{getDuplicateWarning(addForm.keyword, null)}</span>
                     )}
                   </div>
                 </td>
                 <td style={tdStyle}>
                   <BpSelect
+                    data-testid="import-rules-add-category"
                     options={[{ value: '', label: 'Select category…' }, ...categoryOptions]}
                     value={addForm.categoryId}
                     onValueChange={(v) => setAddForm(f => f ? { ...f, categoryId: v } : f)}
@@ -215,8 +217,8 @@ export default function ImportRules() {
                 </td>
                 <td style={tdStyle}>
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    <BpButton variant="primary" size="sm" onClick={saveAdd} disabled={!addForm.keyword.trim() || !addForm.categoryId}>Save</BpButton>
-                    <BpButton variant="ghost" size="sm" onClick={() => setAddForm(null)}>Cancel</BpButton>
+                    <BpButton variant="primary" size="sm" onClick={saveAdd} disabled={!addForm.keyword.trim() || !addForm.categoryId} data-testid="import-rules-add-save">Save</BpButton>
+                    <BpButton variant="ghost" size="sm" onClick={() => setAddForm(null)} data-testid="import-rules-add-cancel">Cancel</BpButton>
                   </div>
                 </td>
               </tr>
@@ -263,7 +265,7 @@ export default function ImportRules() {
               }
 
               return (
-                <tr key={rule.normalizedDescription} style={{ borderBottom: '1px solid var(--bp-border)' }}>
+                <tr key={rule.normalizedDescription} data-testid={`import-rule-row-${rule.normalizedDescription}`} style={{ borderBottom: '1px solid var(--bp-border)' }}>
                   <td style={tdStyle}>
                     <input
                       type="checkbox"
@@ -272,10 +274,10 @@ export default function ImportRules() {
                       style={{ cursor: 'pointer', accentColor: 'var(--bp-accent)' }}
                     />
                   </td>
-                  <td style={{ ...tdStyle, fontFamily: 'var(--bp-font-mono)', fontSize: '13px' }}>
+                  <td data-testid={`import-rule-keyword-${rule.normalizedDescription}`} style={{ ...tdStyle, fontFamily: 'var(--bp-font-mono)', fontSize: '13px' }}>
                     {rule.normalizedDescription}
                   </td>
-                  <td style={tdStyle}>{catName}</td>
+                  <td data-testid={`import-rule-category-${rule.normalizedDescription}`} style={tdStyle}>{catName}</td>
                   <td style={tdStyle}>
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                       {isTablet ? (
@@ -283,19 +285,21 @@ export default function ImportRules() {
                           <button
                             onClick={() => startEdit(rule)}
                             title="Edit"
+                            data-testid={`import-rule-edit-${rule.normalizedDescription}`}
                             style={iconBtnStyle}
                           >
                             <Pencil size={14} />
                           </button>
                           {isConfirmingDelete ? (
                             <>
-                              <button onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} style={{ ...iconBtnStyle, color: 'var(--bp-danger)', fontFamily: 'var(--bp-font-ui)', fontSize: '12px' }}>Confirm?</button>
-                              <button onClick={() => setConfirmDeleteKey(null)} style={iconBtnStyle}>Cancel</button>
+                              <button onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-confirm-${rule.normalizedDescription}`} style={{ ...iconBtnStyle, color: 'var(--bp-danger)', fontFamily: 'var(--bp-font-ui)', fontSize: '12px' }}>Confirm?</button>
+                              <button onClick={() => setConfirmDeleteKey(null)} data-testid={`import-rule-delete-cancel-${rule.normalizedDescription}`} style={iconBtnStyle}>Cancel</button>
                             </>
                           ) : (
                             <button
                               onClick={() => handleSingleDeleteClick(rule.normalizedDescription)}
                               title="Delete"
+                              data-testid={`import-rule-delete-${rule.normalizedDescription}`}
                               style={{ ...iconBtnStyle, color: 'var(--bp-danger)' }}
                             >
                               <Trash2 size={14} />
@@ -304,14 +308,14 @@ export default function ImportRules() {
                         </>
                       ) : (
                         <>
-                          <BpButton variant="ghost" size="sm" onClick={() => startEdit(rule)}>Edit</BpButton>
+                          <BpButton variant="ghost" size="sm" onClick={() => startEdit(rule)} data-testid={`import-rule-edit-${rule.normalizedDescription}`}>Edit</BpButton>
                           {isConfirmingDelete ? (
                             <>
-                              <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)}>Confirm?</BpButton>
-                              <BpButton variant="ghost" size="sm" onClick={() => setConfirmDeleteKey(null)}>Cancel</BpButton>
+                              <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-confirm-${rule.normalizedDescription}`}>Confirm?</BpButton>
+                              <BpButton variant="ghost" size="sm" onClick={() => setConfirmDeleteKey(null)} data-testid={`import-rule-delete-cancel-${rule.normalizedDescription}`}>Cancel</BpButton>
                             </>
                           ) : (
-                            <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)}>Del</BpButton>
+                            <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-${rule.normalizedDescription}`}>Del</BpButton>
                           )}
                         </>
                       )}
@@ -429,7 +433,7 @@ export default function ImportRules() {
   }
 
   return (
-    <div style={{ padding: isMobile ? '16px' : '24px 32px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px', paddingBottom: isMobile ? '100px' : undefined }}>
+    <div data-testid="import-rules-view" style={{ padding: isMobile ? '16px' : '24px 32px', display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '900px', paddingBottom: isMobile ? '100px' : undefined }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -455,6 +459,7 @@ export default function ImportRules() {
           variant="primary"
           size="sm"
           icon={<Plus size={14} />}
+          data-testid="import-rules-add-button"
           onClick={() => { setAddForm({ keyword: '', categoryId: '' }); setEditingKey(null) }}
         >
           {isMobile ? 'Add' : 'Add Rule'}
@@ -468,10 +473,11 @@ export default function ImportRules() {
             placeholder="Search rules…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            data-testid="import-rules-search"
           />
         </div>
         {selected.size > 0 && (
-          <BpButton variant="danger" size="sm" icon={<Trash2 size={14} />} onClick={handleBulkDelete}>
+          <BpButton variant="danger" size="sm" icon={<Trash2 size={14} />} onClick={handleBulkDelete} data-testid="import-rules-bulk-delete">
             Delete {selected.size}
           </BpButton>
         )}
@@ -484,11 +490,13 @@ export default function ImportRules() {
 
       {/* Content */}
       {rules.length === 0 && addForm === null ? (
-        <BpEmptyState
-          heading="No import rules yet"
-          subtext="Rules are created automatically when you assign categories during CSV import, or add one manually."
-          action={{ label: '+ Add your first rule', onClick: () => setAddForm({ keyword: '', categoryId: '' }) }}
-        />
+        <div data-testid="import-rules-empty-state">
+          <BpEmptyState
+            heading="No import rules yet"
+            subtext="Rules are created automatically when you assign categories during CSV import, or add one manually."
+            action={{ label: '+ Add your first rule', onClick: () => setAddForm({ keyword: '', categoryId: '' }) }}
+          />
+        </div>
       ) : filtered.length === 0 && search && addForm === null ? (
         <BpEmptyState
           heading={`No rules matching "${search}"`}

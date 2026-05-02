@@ -56,19 +56,18 @@ function ThemeCard({
   isRemovable,
   onApply,
   onRemove,
-  applyTestId,
 }: {
   theme: BpTheme
   isActive: boolean
   isRemovable: boolean
   onApply: () => void
   onRemove?: () => void
-  applyTestId?: string
 }) {
   const fontName = extractFontName(theme.tokens['--bp-font-ui'] ?? '') ?? 'System'
 
   return (
     <div
+      data-testid={`theme-card-${theme.id}`}
       style={{
         border: isActive
           ? '2px solid var(--bp-accent)'
@@ -91,6 +90,7 @@ function ThemeCard({
       {/* Active checkmark */}
       {isActive && (
         <div
+          data-testid={`theme-card-active-${theme.id}`}
           style={{
             position: 'absolute',
             top: '10px',
@@ -146,12 +146,12 @@ function ThemeCard({
       {/* Actions */}
       <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>
         {!isActive && (
-          <BpButton variant="secondary" size="sm" onClick={onApply} data-testid={applyTestId}>
+          <BpButton variant="secondary" size="sm" onClick={onApply} data-testid={`theme-card-apply-${theme.id}`}>
             Apply
           </BpButton>
         )}
         {isRemovable && onRemove && (
-          <BpButton variant="ghost" size="sm" onClick={onRemove}>
+          <BpButton variant="ghost" size="sm" onClick={onRemove} data-testid={`theme-card-remove-${theme.id}`}>
             Remove
           </BpButton>
         )}
@@ -231,7 +231,7 @@ function ThemePreviewPanel({
       </div>
 
       {/* Font label */}
-      <div style={{ fontSize: '12px', color: 'var(--bp-text-secondary)', fontFamily: 'var(--bp-font-ui)' }}>
+      <div data-testid="theme-preview-font-label" style={{ fontSize: '12px', color: 'var(--bp-text-secondary)', fontFamily: 'var(--bp-font-ui)' }}>
         Typography: <strong>{fontName}</strong>
       </div>
 
@@ -240,23 +240,24 @@ function ThemePreviewPanel({
         <span style={{ fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)' }}>
           Icons:
         </span>
-        {['nav-dashboard', 'nav-transactions', 'nav-budget'].map((slot) => (
+        {(['nav-dashboard', 'nav-transactions', 'nav-budget'] as const).map((slot, idx) => (
           <ThemeIcon
             key={slot}
             slot={slot}
             size={18}
             themeOverride={theme}
             style={{ color: 'var(--bp-text-secondary)' }}
+            data-testid={`theme-preview-icon-${idx + 1}`}
           />
         ))}
       </div>
 
       {/* Three-button footer */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        <BpButton variant="primary" onClick={onSaveAndApply} data-testid="theme-apply-button">
+        <BpButton variant="primary" onClick={onSaveAndApply} data-testid="theme-save-and-apply-button">
           Save &amp; Apply
         </BpButton>
-        <BpButton variant="secondary" onClick={onSaveToLibrary}>
+        <BpButton variant="secondary" onClick={onSaveToLibrary} data-testid="theme-save-to-library-button">
           Save to Library
         </BpButton>
         <BpButton variant="ghost" onClick={onCancel}>
@@ -441,11 +442,11 @@ export default function Settings() {
       </BpCard>
 
       {/* Appearance */}
-      <BpCard padding="md">
+      <BpCard padding="md" data-testid="theme-gallery">
         <SectionTitle>Appearance</SectionTitle>
 
         {/* BUNDLED themes */}
-        <div style={{ marginTop: '16px' }}>
+        <div data-testid="theme-gallery-bundled" style={{ marginTop: '16px' }}>
           <div style={{ fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
             Bundled
           </div>
@@ -457,7 +458,6 @@ export default function Settings() {
                 isActive={activeTheme.id === theme.id}
                 isRemovable={false}
                 onApply={() => handleApplyFromGallery(theme)}
-                applyTestId={theme.id === 'midnight' ? 'theme-reset-button' : undefined}
               />
             ))}
           </div>
@@ -465,7 +465,7 @@ export default function Settings() {
 
         {/* YOUR THEMES — only if user has installed themes */}
         {installedThemes.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
+          <div data-testid="theme-gallery-installed" style={{ marginTop: '20px' }}>
             <div style={{ fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
               Your Themes
             </div>

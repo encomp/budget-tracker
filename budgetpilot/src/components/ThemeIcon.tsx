@@ -51,6 +51,7 @@ interface ThemeIconProps {
   size?: number
   className?: string
   style?: React.CSSProperties
+  'data-testid'?: string
   // Used by ThemePreviewPanel to render icons with a non-active theme's overrides.
   themeOverride?: BpTheme
 }
@@ -60,6 +61,7 @@ export function ThemeIcon({
   size,
   className,
   style,
+  'data-testid': dataTestId,
   themeOverride,
 }: ThemeIconProps) {
   const activeTheme = useAppStore((s) => s.activeTheme)
@@ -82,6 +84,7 @@ export function ThemeIcon({
     return (
       <span
         className={className}
+        data-testid={dataTestId}
         style={{
           width: iconSize,
           height: iconSize,
@@ -105,6 +108,7 @@ export function ThemeIcon({
       strokeWidth={stroke}
       className={className}
       style={style}
+      data-testid={dataTestId}
     />
   )
 }
