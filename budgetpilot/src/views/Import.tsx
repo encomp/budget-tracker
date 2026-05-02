@@ -1,6 +1,7 @@
 import * as React from 'react'
 import Papa from 'papaparse'
 import { CheckCircle, Upload } from 'lucide-react'
+import { useLiveQuery } from 'dexie-react-hooks'
 import { useAppStore } from '../store/useAppStore'
 import { useMonthCategories } from '../hooks/useMonthCategories'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -81,7 +82,14 @@ export default function Import() {
   const setActiveView = useAppStore((s) => s.setActiveView)
   const breakpoint = useBreakpoint()
   const isMobile = breakpoint === 'mobile'
-  const categories = useMonthCategories(activeMonth)
+  const monthCategories = useMonthCategories(activeMonth)
+  // Fall back to the most recent budget's categories when the active month has none
+  const fallbackCategories = useLiveQuery(async () => {
+    if (monthCategories.length > 0) return []
+    const latest = await db.budgets.orderBy('month').reverse().first()
+    return latest?.categories ?? []
+  }, [monthCategories.length], []) ?? []
+  const categories = monthCategories.length > 0 ? monthCategories : fallbackCategories
   const { toast, showToast, dismiss } = useToast()
 
   const [stage, setStage] = React.useState<Stage>('upload')
