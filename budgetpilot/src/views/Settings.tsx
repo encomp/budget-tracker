@@ -260,7 +260,7 @@ function ThemePreviewPanel({
         <BpButton variant="secondary" onClick={onSaveToLibrary} data-testid="theme-save-to-library-button">
           Save to Library
         </BpButton>
-        <BpButton variant="ghost" onClick={onCancel}>
+        <BpButton variant="ghost" onClick={onCancel} data-testid="theme-preview-cancel">
           Cancel
         </BpButton>
       </div>

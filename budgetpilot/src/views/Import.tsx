@@ -96,7 +96,6 @@ export default function Import() {
   const [ruleConflicts, setRuleConflicts] = React.useState<string[]>([])
   const [processing, setProcessing] = React.useState(false)
   const [importing, setImporting] = React.useState(false)
-  const [showConflictWarning, setShowConflictWarning] = React.useState(false)
   const conflictRowRefs = React.useRef<Record<number, HTMLTableRowElement | HTMLDivElement | null>>({})
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const dropZoneRef = React.useRef<HTMLDivElement>(null)
@@ -219,7 +218,6 @@ export default function Import() {
     setSaveAsRule({})
     setRuleKeyOverrides({})
     setRuleConflicts([])
-    setShowConflictWarning(false)
   }
 
   function handleDrop(e: React.DragEvent) {
@@ -228,15 +226,14 @@ export default function Import() {
     if (file) processFile(file)
   }
 
-  function handleImportWithoutRules() {
+  async function handleImportWithoutRules() {
     const allFalse: Record<number, boolean> = {}
     Object.keys(categoryOverrides).forEach((k) => { allFalse[Number(k)] = false })
     setSaveAsRule(allFalse)
-    setShowConflictWarning(false)
+    await handleImport()
   }
 
   function handleReviewConflicts() {
-    setShowConflictWarning(false)
     // Find first conflicting row index and scroll to it
     const conflictIdx = preview.findIndex((item, i) => {
       const key = ruleKeyOverrides[i] ?? deriveRuleKey(normalize(item.note))
@@ -342,6 +339,7 @@ export default function Import() {
                     {field}
                   </div>
                   <BpSelect
+                    data-testid={`map-field-${field}`}
                     options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
                     value={(mapping[field] as string | undefined) ?? ''}
                     onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
@@ -368,6 +366,7 @@ export default function Import() {
                     </td>
                     <td style={tdStyle}>
                       <BpSelect
+                        data-testid={`map-field-${field}`}
                         options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
                         value={(mapping[field] as string | undefined) ?? ''}
                         onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
@@ -646,8 +645,8 @@ export default function Import() {
 
           {/* Summary counter + action buttons */}
           <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {/* Conflict warning */}
-            {showConflictWarning && ruleConflicts.length > 0 && (
+            {/* Conflict warning — auto-shows when conflicts detected */}
+            {ruleConflicts.length > 0 && (
               <div data-testid="import-conflict-panel" style={{ background: 'var(--bp-bg-surface-alt)', border: '1px solid var(--bp-warning)', borderRadius: 'var(--bp-radius-md)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-warning)', fontWeight: 600 }}>
                   ⚠ {ruleConflicts.length} rule conflict{ruleConflicts.length > 1 ? 's' : ''} detected: {ruleConflicts.map(k => `"${k}"`).join(', ')}
@@ -658,13 +657,12 @@ export default function Import() {
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                   <BpButton variant="secondary" size="sm" onClick={handleReviewConflicts} data-testid="import-conflict-review">Review Conflicts</BpButton>
                   <BpButton variant="ghost" size="sm" onClick={handleImportWithoutRules} data-testid="import-without-rules">Import without saving rules</BpButton>
-                  <BpButton variant="ghost" size="sm" onClick={() => setShowConflictWarning(false)}>Cancel</BpButton>
                 </div>
               </div>
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'stretch' : 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-              {rulesToSaveCount > 0 && (
+              {rulesToSaveCount > 0 && ruleConflicts.length === 0 && (
                 <span data-testid="import-rule-count-summary" style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-muted)' }}>
                   {preview.length} transactions · {rulesToSaveCount} rule{rulesToSaveCount > 1 ? 's' : ''} will be saved
                 </span>
@@ -673,20 +671,16 @@ export default function Import() {
                 <BpButton variant="ghost" onClick={handleStartOver} data-testid="import-start-over">
                   Start Over
                 </BpButton>
-                <BpButton
-                  variant="primary"
-                  loading={importing}
-                  data-testid="import-confirm-button"
-                  onClick={() => {
-                    if (ruleConflicts.length > 0) {
-                      setShowConflictWarning(true)
-                    } else {
-                      handleImport()
-                    }
-                  }}
-                >
-                  {importing ? '' : `Import ${preview.length} Transactions`}
-                </BpButton>
+                {ruleConflicts.length === 0 && (
+                  <BpButton
+                    variant="primary"
+                    loading={importing}
+                    data-testid="import-confirm-button"
+                    onClick={handleImport}
+                  >
+                    {importing ? '' : `Import ${preview.length} Transactions`}
+                  </BpButton>
+                )}
               </div>
             </div>
           </div>
