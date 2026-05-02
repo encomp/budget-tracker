@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Search, Filter, Trash2, Pencil } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { useMonthCategories } from '../hooks/useMonthCategories'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -20,6 +21,7 @@ import { ThemeIcon } from '../components/ThemeIcon'
 import type { BpTransaction, BpCategory } from '../types'
 
 export default function Transactions() {
+  const { t } = useTranslation()
   const activeMonth = useAppStore((s) => s.activeMonth)
   const breakpoint = useBreakpoint()
   const isMobile = breakpoint === 'mobile'
@@ -86,7 +88,7 @@ export default function Transactions() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
         <h1 style={{ fontFamily: 'var(--bp-font-ui)', fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--bp-text-primary)' }}>
-          Transactions
+          {t('transactions.title')}
         </h1>
         {!isMobile && filtered.length > 0 && (
           <span style={{ fontFamily: 'var(--bp-font-mono)', fontSize: '14px', color: 'var(--bp-text-muted)' }}>
@@ -103,7 +105,7 @@ export default function Transactions() {
             data-testid="txn-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search transactions…"
+            placeholder={t('transactions.searchPlaceholder')}
             style={{
               width: '100%',
               background: 'var(--bp-bg-surface-alt)',
@@ -119,7 +121,7 @@ export default function Transactions() {
           />
         </div>
         <BpButton variant="secondary" size="sm" icon={<Filter size={13} />} onClick={() => setFilterOpen(!filterOpen)}>
-          Filter
+          {t('transactions.filter')}
         </BpButton>
       </div>
 
@@ -191,10 +193,11 @@ export default function Transactions() {
 }
 
 function EmptyState() {
+  const { t } = useTranslation()
   return (
     <BpEmptyState
-      heading="No transactions found"
-      subtext="Try adjusting your filters or add a new transaction."
+      heading={t('transactions.noTransactions')}
+      subtext={t('transactions.noTransactionsFilter')}
     />
   )
 }
@@ -206,6 +209,7 @@ function SwipeCard({
   onEdit: () => void; onDelete: () => void
   onAssignCategory: (id: string) => void; categoryOptions: { value: string; label: string }[]
 }) {
+  const { t } = useTranslation()
   const touchStartX = React.useRef(0)
 
   return (
@@ -246,7 +250,7 @@ function SwipeCard({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
             {txn.categoryId === null ? (
-              <BpBadge variant="warning">Uncategorized</BpBadge>
+              <BpBadge variant="warning">{t('transactions.uncategorized')}</BpBadge>
             ) : catName ? (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                 <ThemeIcon
@@ -287,6 +291,7 @@ function TxnTable({
   onEdit: (t: BpTransaction) => void; onDelete: (id: string) => void
   onAssignCategory: (txn: BpTransaction, catId: string) => void
 }) {
+  const { t } = useTranslation()
   if (txns.length === 0) return <EmptyState />
 
   return (

@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import { animate } from 'motion/react'
 import { ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { ThemeIcon } from './ThemeIcon'
 import type { ViewName } from '../types'
@@ -9,18 +10,18 @@ import { getMotionConfig } from '../lib/animation'
 
 interface NavItem {
   view: ViewName
-  label: string
+  labelKey: string
   slot: string
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { view: 'dashboard',    label: 'Dashboard',    slot: 'nav-dashboard' },
-  { view: 'transactions', label: 'Transactions', slot: 'nav-transactions' },
-  { view: 'import',       label: 'Import',       slot: 'nav-import' },
-  { view: 'budget',       label: 'Budget',       slot: 'nav-budget' },
-  { view: 'debts',        label: 'Debts',        slot: 'nav-debts' },
-  { view: 'settings',     label: 'Settings',     slot: 'nav-settings' },
-  { view: 'export-import',label: 'Export/Import',slot: 'nav-export' },
+  { view: 'dashboard',    labelKey: 'nav.dashboard',    slot: 'nav-dashboard' },
+  { view: 'transactions', labelKey: 'nav.transactions', slot: 'nav-transactions' },
+  { view: 'import',       labelKey: 'nav.import',       slot: 'nav-import' },
+  { view: 'budget',       labelKey: 'nav.budget',       slot: 'nav-budget' },
+  { view: 'debts',        labelKey: 'nav.debts',        slot: 'nav-debts' },
+  { view: 'settings',     labelKey: 'nav.settings',     slot: 'nav-settings' },
+  { view: 'export-import',labelKey: 'nav.exportImport', slot: 'nav-export' },
 ]
 
 interface SidebarProps {
@@ -28,6 +29,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ breakpoint }: SidebarProps) {
+  const { t } = useTranslation()
   const activeView = useAppStore(s => s.activeView)
   const setActiveView = useAppStore(s => s.setActiveView)
   const sidebarExpanded = useAppStore(s => s.sidebarExpanded)
@@ -104,7 +106,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
               <button
                 key={item.view}
                 onClick={() => setActiveView(item.view)}
-                title={item.label}
+                title={t(item.labelKey)}
                 data-testid={`nav-${item.view}`}
                 style={{
                   width: '48px',
@@ -203,7 +205,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
                     }}
                   >
                     <ThemeIcon slot={item.slot} size={18} />
-                    {item.label}
+                    {t(item.labelKey)}
                   </button>
                 )
               })}

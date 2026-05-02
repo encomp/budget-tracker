@@ -2,6 +2,7 @@ import * as React from 'react'
 import Papa from 'papaparse'
 import { CheckCircle, Upload } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { useMonthCategories } from '../hooks/useMonthCategories'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -27,10 +28,11 @@ interface ParsedCSV {
 }
 
 function Stepper({ stage }: { stage: Stage }) {
+  const { t } = useTranslation()
   const steps: { key: Stage; label: string }[] = [
-    { key: 'upload', label: '1. Upload' },
-    { key: 'map', label: '2. Map' },
-    { key: 'review', label: '3. Review' },
+    { key: 'upload', label: `1. ${t('import.step1')}` },
+    { key: 'map', label: `2. ${t('import.step2')}` },
+    { key: 'review', label: `3. ${t('import.step3')}` },
   ]
   return (
     <div data-testid="import-stepper" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
@@ -71,6 +73,7 @@ function Stepper({ stage }: { stage: Stage }) {
 const REQUIRED_FIELDS: (keyof HeuristicMapping)[] = ['date', 'amount', 'description']
 
 export default function Import() {
+  const { t } = useTranslation()
   const activeMonth = useAppStore((s) => s.activeMonth)
   const setActiveView = useAppStore((s) => s.setActiveView)
   const breakpoint = useBreakpoint()
@@ -259,7 +262,7 @@ export default function Import() {
     <div style={{ padding: isMobile ? '16px' : '24px 32px', display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '900px' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <h1 style={{ fontFamily: 'var(--bp-font-ui)', fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--bp-text-primary)' }}>
-          Smart CSV Import
+          {t('import.title')}
         </h1>
         <Stepper stage={stage} />
       </div>
@@ -314,7 +317,7 @@ export default function Import() {
               ) : (
                 <>
                   <Upload size={32} style={{ margin: '0 auto 12px', color: 'var(--bp-accent)', display: 'block' }} />
-                  <div>Drag and drop your bank CSV here, or <span style={{ color: 'var(--bp-accent)' }}>click to browse</span></div>
+                  <div>{t('import.dropzone')}, or <span style={{ color: 'var(--bp-accent)' }}>{t('import.dropzoneHint')}</span></div>
                   <div style={{ fontSize: '12px', marginTop: '8px' }}>Supports Chase, Bank of America, Wells Fargo, Citi, Capital One, Amex, Discover, USAA</div>
                 </>
               )}
@@ -387,7 +390,7 @@ export default function Import() {
 
           <div style={{ marginTop: '16px', display: 'flex', justifyContent: isMobile ? 'stretch' : 'flex-end' }}>
             <BpButton variant="primary" disabled={!isComplete} onClick={handleConfirmMapping} data-testid="import-confirm-mapping">
-              Confirm Mapping
+              {t('import.confirmMapping')}
             </BpButton>
           </div>
         </BpCard>
@@ -410,7 +413,7 @@ export default function Import() {
 
           {preview.length === 0 && (
             <BpEmptyState
-              heading="No rows found in this CSV"
+              heading={t('import.previewEmpty')}
               subtext="The file may be empty or could not be parsed correctly."
             />
           )}
@@ -655,8 +658,8 @@ export default function Import() {
                   Two rows map the same keyword to different categories.
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  <BpButton variant="secondary" size="sm" onClick={handleReviewConflicts} data-testid="import-conflict-review">Review Conflicts</BpButton>
-                  <BpButton variant="ghost" size="sm" onClick={handleImportWithoutRules} data-testid="import-without-rules">Import without saving rules</BpButton>
+                  <BpButton variant="secondary" size="sm" onClick={handleReviewConflicts} data-testid="import-conflict-review">{t('import.reviewConflicts')}</BpButton>
+                  <BpButton variant="ghost" size="sm" onClick={handleImportWithoutRules} data-testid="import-without-rules">{t('import.importWithoutRules')}</BpButton>
                 </div>
               </div>
             )}
@@ -669,7 +672,7 @@ export default function Import() {
               )}
               <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
                 <BpButton variant="ghost" onClick={handleStartOver} data-testid="import-start-over">
-                  Start Over
+                  {t('import.startOver')}
                 </BpButton>
                 {ruleConflicts.length === 0 && (
                   <BpButton
@@ -678,7 +681,7 @@ export default function Import() {
                     data-testid="import-confirm-button"
                     onClick={handleImport}
                   >
-                    {importing ? '' : `Import ${preview.length} Transactions`}
+                    {importing ? '' : t('import.importButton_other', { count: preview.length })}
                   </BpButton>
                 )}
               </div>
