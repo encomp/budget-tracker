@@ -46,7 +46,7 @@ function useCountUp(target: number, duration = 1000): number {
     const step = (timestamp: number) => {
       if (!start) start = timestamp
       const progress = Math.min((timestamp - start) / duration, 1)
-      setValue(Math.floor(progress * target))
+      setValue(Math.round(progress * target * 100) / 100)
       if (progress < 1) requestAnimationFrame(step)
     }
     requestAnimationFrame(step)

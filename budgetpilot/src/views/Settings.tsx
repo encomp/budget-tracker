@@ -375,12 +375,12 @@ export default function Settings() {
 
   async function handleSaveAndApply() {
     if (!pendingTheme) return
-    await ThemeLibrary.add(pendingTheme)
-    addInstalledTheme(pendingTheme)
     applyTheme(pendingTheme)
     setActiveTheme(pendingTheme)
     setPendingTheme(null)
     showToast(`"${pendingTheme.name}" applied.`, 'success')
+    await ThemeLibrary.add(pendingTheme)
+    addInstalledTheme(pendingTheme)
   }
 
   function handleApplyFromGallery(theme: BpTheme) {
