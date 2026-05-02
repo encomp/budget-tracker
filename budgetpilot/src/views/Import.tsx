@@ -410,7 +410,7 @@ export default function Import() {
 
           {/* Mobile card list */}
           {isMobile && preview.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
+            <div data-testid="import-preview-table" style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '400px', overflowY: 'auto' }}>
               {preview.slice(0, 20).map((item, i) => {
                 const catId = categoryOverrides[i] ?? item.categoryId
                 const catName = catId ? categories.find((c) => c.id === catId)?.name : null

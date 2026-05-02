@@ -258,8 +258,6 @@ export default function Dashboard() {
   const activeMonth = useAppStore((s) => s.activeMonth)
   const setActiveMonth = useAppStore((s) => s.setActiveMonth)
   const setActiveView = useAppStore((s) => s.setActiveView)
-  const transactionModalOpen = useAppStore((s) => s.transactionModalOpen)
-  const setTransactionModalOpen = useAppStore((s) => s.setTransactionModalOpen)
   const breakpoint = useBreakpoint()
   const isMobile = breakpoint === 'mobile'
 
@@ -273,6 +271,7 @@ export default function Dashboard() {
   const [trendRange, setTrendRange] = React.useState<TrendRange>('6m')
   const [lastExport, setLastExport] = React.useState<string | null>(null)
   const [filteredCategoryId, setFilteredCategoryId] = React.useState<string | null>(null)
+  const [editModalOpen, setEditModalOpen] = React.useState(false)
   const [editTxn, setEditTxn] = React.useState<BpTransaction | undefined>(undefined)
   const [deleteTarget, setDeleteTarget] = React.useState<string | null>(null)
   const { toast, showToast, dismiss } = useToast()
@@ -857,7 +856,7 @@ export default function Dashboard() {
                   catName={t.categoryId ? catMap[t.categoryId] : undefined}
                   onEdit={() => {
                     setEditTxn(t)
-                    setTransactionModalOpen(true)
+                    setEditModalOpen(true)
                   }}
                   onDelete={() => setDeleteTarget(t.id)}
                 />
@@ -870,22 +869,24 @@ export default function Dashboard() {
             catMap={catMap}
             onEdit={(t) => {
               setEditTxn(t)
-              setTransactionModalOpen(true)
+              setEditModalOpen(true)
             }}
             onDelete={(id) => setDeleteTarget(id)}
           />
         )}
       </BpCard>
 
-      <TransactionModal
-        open={transactionModalOpen}
-        onOpenChange={(open) => {
-          setTransactionModalOpen(open)
-          if (!open) setEditTxn(undefined)
-        }}
-        activeMonth={activeMonth}
-        editTransaction={editTxn}
-      />
+      {editModalOpen && (
+        <TransactionModal
+          open={editModalOpen}
+          onOpenChange={(open) => {
+            setEditModalOpen(open)
+            if (!open) setEditTxn(undefined)
+          }}
+          activeMonth={activeMonth}
+          editTransaction={editTxn}
+        />
+      )}
 
       <BpConfirmDialog
         open={deleteTarget !== null}

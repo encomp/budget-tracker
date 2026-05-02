@@ -104,12 +104,14 @@ export default function App() {
         <Plus size={22} strokeWidth={2.5} />
       </button>
 
-      <TransactionModal
-        open={transactionModalOpen}
-        onOpenChange={setTransactionModalOpen}
-        activeMonth={activeMonth}
-        testId="transaction-modal"
-      />
+      {transactionModalOpen && (
+        <TransactionModal
+          open={transactionModalOpen}
+          onOpenChange={setTransactionModalOpen}
+          activeMonth={activeMonth}
+          testId="transaction-modal"
+        />
+      )}
 
       {breakpoint === 'mobile' && <BottomTabBar />}
     </div>
