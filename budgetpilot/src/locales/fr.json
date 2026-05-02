@@ -1,0 +1,44 @@
+{
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "search": "Rechercher",
+    "loading": "Chargement…",
+    "noResults": "Aucun résultat",
+    "apply": "Appliquer",
+    "reset": "Réinitialiser",
+    "remove": "Retirer",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "undo": "Annuler",
+    "currency": "€"
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "transactions": "Transactions",
+    "import": "Importer",
+    "budget": "Budget",
+    "debts": "Dettes",
+    "settings": "Paramètres",
+    "exportImport": "Exporter / Importer"
+  },
+  "errors": {
+    "required": "Ce champ est obligatoire",
+    "invalidDate": "Date invalide. Utilisez le format YYYY-MM-DD",
+    "positiveNumber": "Doit être supérieur à 0",
+    "invalidTheme": "Fichier de thème invalide. Des tokens obligatoires sont manquants.",
+    "invalidBackup": "Fichier de sauvegarde invalide."
+  },
+  "settings": {
+    "language": "Langue",
+    "appearance": "Apparence",
+    "profile": "Profil",
+    "dangerZone": "Zone dangereuse"
+  }
+}

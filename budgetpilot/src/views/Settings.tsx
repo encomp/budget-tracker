@@ -2,10 +2,12 @@ import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { animate } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { BpCard } from '../components/ui/BpCard'
 import { BpButton } from '../components/ui/BpButton'
 import { BpInput } from '../components/ui/BpInput'
+import { BpSelect } from '../components/ui/BpSelect'
 import { BpConfirmDialog } from '../components/ui/BpConfirmDialog'
 import { BpToast, useToast } from '../components/ui/BpToast'
 import { ThemeIcon } from '../components/ThemeIcon'
@@ -13,6 +15,7 @@ import { ProfileSchema, type ProfileFormValues } from '../lib/schemas'
 import { THEME_MIDNIGHT, applyTheme, validateTheme } from '../lib/theme'
 import { BUNDLED_THEMES } from '../lib/themes'
 import { ThemeLibrary } from '../lib/settings'
+import { SUPPORTED_LOCALES } from '../lib/i18n'
 import { extractFontName } from '../lib/themeUtils'
 import { getMotionConfig } from '../lib/animation'
 import { ChevronRight } from 'lucide-react'
@@ -305,12 +308,14 @@ const settingsRowSubStyle: React.CSSProperties = {
 // ─── Settings view ───────────────────────────────────────────────────────────
 
 export default function Settings() {
+  const { t, i18n } = useTranslation()
   const setActiveView = useAppStore((s) => s.setActiveView)
   const activeTheme = useAppStore((s) => s.activeTheme)
   const setActiveTheme = useAppStore((s) => s.setActiveTheme)
   const installedThemes = useAppStore((s) => s.installedThemes)
   const addInstalledTheme = useAppStore((s) => s.addInstalledTheme)
   const removeInstalledTheme = useAppStore((s) => s.removeInstalledTheme)
+  const setLocale = useAppStore((s) => s.setLocale)
   const { toast, showToast, dismiss } = useToast()
   const [clearConfirmOpen, setClearConfirmOpen] = React.useState(false)
   const [pendingTheme, setPendingTheme] = React.useState<BpTheme | null>(null)
@@ -423,6 +428,19 @@ export default function Settings() {
             </BpButton>
           </div>
         </form>
+      </BpCard>
+
+      {/* Language */}
+      <BpCard padding="md">
+        <SectionTitle>{t('settings.language')}</SectionTitle>
+        <div style={{ marginTop: '16px' }}>
+          <BpSelect
+            options={SUPPORTED_LOCALES.map((l) => ({ value: l.code, label: l.label }))}
+            value={i18n.language.split('-')[0]}
+            onValueChange={(code) => setLocale(code)}
+            data-testid="settings-language-select"
+          />
+        </div>
       </BpCard>
 
       {/* Data / Import Rules */}

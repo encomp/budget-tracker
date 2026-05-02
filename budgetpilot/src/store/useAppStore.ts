@@ -3,6 +3,8 @@ import { format } from 'date-fns'
 import type { BpTheme } from '../types'
 import type { ViewName } from '../types'
 import { THEME_MIDNIGHT } from '../lib/themes'
+import i18n from '../lib/i18n'
+import { Settings } from '../lib/settings'
 
 interface AppState {
   activeMonth: string
@@ -11,6 +13,7 @@ interface AppState {
   sidebarExpanded: boolean
   backupReminderShown: boolean
   transactionModalOpen: boolean
+  locale: string
   // Theme library — uploaded packs only. Bundled themes are always available
   // from BUNDLED_THEMES constant and are never stored here.
   installedThemes: BpTheme[]
@@ -20,6 +23,7 @@ interface AppState {
   setSidebarExpanded: (expanded: boolean) => void
   setBackupReminderShown: (shown: boolean) => void
   setTransactionModalOpen: (open: boolean) => void
+  setLocale: (locale: string) => void
   setInstalledThemes: (themes: BpTheme[]) => void
   addInstalledTheme: (theme: BpTheme) => void
   removeInstalledTheme: (id: string) => void
@@ -32,6 +36,7 @@ export const useAppStore = create<AppState>((set) => ({
   sidebarExpanded: false,
   backupReminderShown: false,
   transactionModalOpen: false,
+  locale: 'en',
   installedThemes: [],
   setActiveMonth: (month) => set({ activeMonth: month }),
   setActiveView: (view) => set({ activeView: view }),
@@ -39,6 +44,11 @@ export const useAppStore = create<AppState>((set) => ({
   setSidebarExpanded: (expanded) => set({ sidebarExpanded: expanded }),
   setBackupReminderShown: (shown) => set({ backupReminderShown: shown }),
   setTransactionModalOpen: (open) => set({ transactionModalOpen: open }),
+  setLocale: (locale) => {
+    set({ locale })
+    i18n.changeLanguage(locale)
+    Settings.set('locale', locale)
+  },
   setInstalledThemes: (themes) => set({ installedThemes: themes }),
   addInstalledTheme: (theme) =>
     set((state) => {
