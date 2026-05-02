@@ -80,6 +80,7 @@ export default function App() {
 
       {/* Floating + FAB */}
       <button
+        data-testid="fab-add-transaction"
         aria-label="Add transaction"
         onClick={() => setTransactionModalOpen(true)}
         style={{

@@ -154,10 +154,10 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
   const steps: Step[] = ['A', 'B', 'C']
 
   return (
-    <div style={overlayStyle}>
+    <div data-testid="onboarding-modal" style={overlayStyle}>
       <div style={cardStyle}>
         {/* Dot stepper */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+        <div data-testid="onboarding-step-indicator" style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
           {steps.map(s => (
             <div
               key={s}
@@ -187,6 +187,7 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <label style={{ color: 'var(--bp-text-secondary)', fontSize: '0.875rem' }}>Your name</label>
                 <input
+                  data-testid="onboarding-name"
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Alex"
@@ -198,6 +199,7 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <label style={{ color: 'var(--bp-text-secondary)', fontSize: '0.875rem' }}>Currency symbol</label>
                 <input
+                  data-testid="onboarding-currency"
                   value={currency}
                   onChange={e => setCurrency(e.target.value)}
                   placeholder="$"
@@ -207,7 +209,7 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
                 {currencyError && <span style={{ color: 'var(--bp-danger)', fontSize: '0.8rem' }}>{currencyError}</span>}
               </div>
 
-              <button onClick={handleStepA} style={isMobile ? fixedBtnStyle : btnStyle}>
+              <button data-testid="onboarding-next" onClick={handleStepA} style={isMobile ? fixedBtnStyle : btnStyle}>
                 Next
               </button>
             </div>
@@ -227,6 +229,7 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <label style={{ color: 'var(--bp-text-secondary)', fontSize: '0.875rem' }}>Monthly income</label>
                 <input
+                  data-testid="onboarding-income"
                   type="number"
                   value={income}
                   onChange={e => setIncome(e.target.value)}
@@ -254,6 +257,7 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
                       </div>
                     </div>
                     <input
+                      data-testid={`onboarding-slider-${key}`}
                       type="range"
                       min={0}
                       max={100}
@@ -266,7 +270,7 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
                 ))}
               </div>
 
-              <button onClick={handleStepB} style={isMobile ? fixedBtnStyle : btnStyle}>
+              <button data-testid="onboarding-next" onClick={handleStepB} style={isMobile ? fixedBtnStyle : btnStyle}>
                 Next
               </button>
             </div>
@@ -308,7 +312,7 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
                 ))}
               </div>
 
-              <button onClick={handleComplete} style={isMobile ? fixedBtnStyle : btnStyle}>
+              <button data-testid="onboarding-finish" onClick={handleComplete} style={isMobile ? fixedBtnStyle : btnStyle}>
                 Get Started
               </button>
             </div>

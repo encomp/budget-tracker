@@ -61,6 +61,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
       <>
         <nav
           ref={railRef}
+          data-testid="sidebar"
           style={{
             width: 'var(--bp-sidebar-width-rail)',
             flexShrink: 0,
@@ -104,6 +105,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
                 key={item.view}
                 onClick={() => setActiveView(item.view)}
                 title={item.label}
+                data-testid={`nav-${item.view}`}
                 style={{
                   width: '48px',
                   height: '48px',
@@ -183,6 +185,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
                   <button
                     key={item.view}
                     onClick={() => { setActiveView(item.view); setSidebarExpanded(false) }}
+                    data-testid={`nav-${item.view}`}
                     style={{
                       width: '100%',
                       background: isActive ? 'var(--bp-accent-muted)' : 'none',
@@ -215,6 +218,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
   const isRail = false
   return (
     <nav
+      data-testid="sidebar"
       style={{
         width: 'var(--bp-sidebar-width-full)',
         flexShrink: 0,
@@ -258,6 +262,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
           <button
             key={item.view}
             onClick={() => setActiveView(item.view)}
+            data-testid={`nav-${item.view}`}
             style={{
               width: '100%',
               background: isActive ? 'var(--bp-accent-muted)' : 'none',

@@ -24,13 +24,18 @@ function MetricPill({
   label,
   value,
   valueColor,
+  testId,
+  valueTestId,
 }: {
   label: string
   value: string
   valueColor?: string
+  testId?: string
+  valueTestId?: string
 }) {
   return (
     <div
+      data-testid={testId}
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -55,6 +60,7 @@ function MetricPill({
         {label}
       </span>
       <span
+        data-testid={valueTestId}
         style={{
           fontSize: '18px',
           fontFamily: 'var(--bp-font-mono)',
@@ -228,10 +234,12 @@ export default function Debts() {
         label="Interest Saved"
         value={`$${interestComparison.saved.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
         valueColor="var(--bp-positive)"
+        valueTestId="interest-saved-value"
       />
       <MetricPill
         label="Debt-Free Date"
         value={debtFreeDate ? format(parseISO(debtFreeDate), 'MMM yyyy') : '—'}
+        valueTestId="debt-free-date"
       />
     </div>
   )
@@ -242,6 +250,7 @@ export default function Debts() {
         variant={method === 'snowball' ? 'primary' : 'secondary'}
         onClick={() => setMethod('snowball')}
         size="sm"
+        data-testid="method-toggle-snowball"
       >
         Snowball
       </BpButton>
@@ -249,6 +258,7 @@ export default function Debts() {
         variant={method === 'avalanche' ? 'primary' : 'secondary'}
         onClick={() => setMethod('avalanche')}
         size="sm"
+        data-testid="method-toggle-avalanche"
       >
         Avalanche
       </BpButton>
@@ -261,6 +271,7 @@ export default function Debts() {
 
   const debtList = (
     <div
+      data-testid="debt-list"
       style={{
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr 1fr' : '1fr',
@@ -271,7 +282,7 @@ export default function Debts() {
       }}
     >
       {debts.map((debt) => (
-        <BpCard key={debt.id} padding="sm">
+        <BpCard key={debt.id} padding="sm" data-testid={`debt-card-${debt.id}`}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontFamily: 'var(--bp-font-ui)', fontWeight: 600, color: 'var(--bp-text-primary)', fontSize: '14px' }}>
@@ -308,7 +319,7 @@ export default function Debts() {
   )
 
   const barChart = (
-    <div style={{ height: isMobile ? '200px' : '320px', width: '100%' }}>
+    <div data-testid="chart-payoff" style={{ height: isMobile ? '200px' : '320px', width: '100%' }}>
       {chartData.length > 0 && (
         <ResponsiveBar
           data={chartData}

@@ -100,6 +100,7 @@ export default function Transactions() {
         <div style={{ flex: 1, position: 'relative' }}>
           <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--bp-text-muted)', pointerEvents: 'none' }} />
           <input
+            data-testid="txn-search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search transactions…"
@@ -288,7 +289,7 @@ function TxnTable({
   if (txns.length === 0) return <EmptyState />
 
   return (
-    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+    <table data-testid="transactions-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
       <thead>
         <tr>
           <th style={thStyle}>Date</th>
@@ -302,12 +303,12 @@ function TxnTable({
       </thead>
       <tbody>
         {txns.map((t) => (
-          <tr key={t.id}>
+          <tr key={t.id} data-testid="transaction-row">
             <td style={tdStyle}>{t.date}</td>
             <td style={tdStyle}>
               {t.categoryId === null ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <BpBadge variant="warning">Uncategorized</BpBadge>
+                  <BpBadge variant="warning" data-testid="badge-uncategorized">Uncategorized</BpBadge>
                   <BpSelect
                     options={categoryOptions}
                     value=""
@@ -338,7 +339,7 @@ function TxnTable({
               {t.type === 'expense' ? '-' : '+'}${t.amount.toFixed(2)}
             </td>
             <td style={tdStyle}>
-              <BpBadge variant={t.importSource === 'csv' ? 'csv' : 'manual'} />
+              <BpBadge variant={t.importSource === 'csv' ? 'csv' : 'manual'} data-testid="badge-source" />
             </td>
             <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
               <div style={{ display: 'flex', gap: '4px' }}>

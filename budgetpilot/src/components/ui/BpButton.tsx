@@ -14,6 +14,7 @@ export interface BpButtonProps {
   disabled?: boolean
   className?: string
   type?: 'button' | 'submit' | 'reset'
+  'data-testid'?: string
 }
 
 const variantStyles: Record<BpButtonVariant, React.CSSProperties> = {
@@ -55,6 +56,7 @@ export function BpButton({
   disabled,
   className,
   type = 'button',
+  'data-testid': testId,
 }: BpButtonProps) {
   const [hovered, setHovered] = React.useState(false)
 
@@ -94,6 +96,7 @@ export function BpButton({
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={className}
+      data-testid={testId}
     >
       {loading ? (
         <AnimatedIcon type="LoaderCircle" size={16} />

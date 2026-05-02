@@ -110,6 +110,7 @@ function CategoryRow({
 
   return (
     <div
+      data-testid={`category-row-${category.id}`}
       style={{
         background: 'var(--bp-bg-surface-alt)',
         borderRadius: 'var(--bp-radius-md)',
@@ -181,7 +182,7 @@ function CategoryRow({
           <Trash2 size={12} />
         </button>
       </div>
-      <BpProgressBar value={spend.pct} />
+      <BpProgressBar value={spend.pct} data-testid={`progress-bar-${category.id}`} aria-valuenow={Math.round(spend.pct)} />
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-mono)' }}>
         <span>${spend.spent.toFixed(0)} spent</span>
         <span>${spend.limit.toFixed(0)} limit</span>
@@ -225,7 +226,7 @@ function GroupSection({
       {groupCats.map((cat) => (
         <CategoryRow key={cat.id} category={cat} month={month} onRename={onRename} onDelete={onDelete} onLimitChange={onLimitChange} />
       ))}
-      <BpButton variant="ghost" size="sm" icon={<Plus size={13} />} onClick={() => onAddCategory(group)}>
+      <BpButton variant="ghost" size="sm" icon={<Plus size={13} />} onClick={() => onAddCategory(group)} data-testid={`add-category-${group}`}>
         Add Category
       </BpButton>
     </div>
@@ -381,20 +382,21 @@ export default function Budget() {
       <BpCard padding="md">
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '24px', alignItems: isMobile ? 'stretch' : 'flex-start' }}>
           <div style={{ flex: '0 0 auto', minWidth: '200px' }}>
-            <BpInput mono label="Expected Monthly Income" type="number" min="0" step="100" value={income} onChange={(e) => setIncome(e.target.value)} onBlur={handleIncomeBlur} placeholder="0" />
+            <BpInput mono label="Expected Monthly Income" type="number" min="0" step="100" value={income} onChange={(e) => setIncome(e.target.value)} onBlur={handleIncomeBlur} placeholder="0" data-testid="budget-income-input" />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {groups.map((key) => (
               <div key={key}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ fontSize: '13px', color: GROUP_COLORS[key], fontFamily: 'var(--bp-font-ui)', fontWeight: 500 }}>
-                    {GROUP_LABELS[key]} ({sliders[key]}%)
+                    {GROUP_LABELS[key]} (<span data-testid={`allocation-value-${key}`}>{sliders[key]}</span>%)
                   </span>
                   <span style={{ fontSize: '13px', fontFamily: 'var(--bp-font-mono)', color: GROUP_COLORS[key] }}>
                     ${Math.round(incomeNum * sliders[key] / 100).toLocaleString()}
                   </span>
                 </div>
                 <input
+                  data-testid={`slider-${key}`}
                   type="range" min={0} max={100} step={1} value={sliders[key]}
                   onChange={(e) => handleSliderChange(key, Number(e.target.value))}
                   onMouseUp={handleSliderCommit} onTouchEnd={handleSliderCommit}

@@ -21,6 +21,7 @@ export function BottomTabBar() {
 
   return (
     <nav
+      data-testid="bottom-tab-bar"
       style={{
         position: 'fixed',
         bottom: 0,
@@ -40,6 +41,7 @@ export function BottomTabBar() {
           <button
             key={tab.view}
             onClick={() => setActiveView(tab.view)}
+            data-testid={`nav-${tab.view}`}
             style={{
               flex: 1,
               background: 'none',

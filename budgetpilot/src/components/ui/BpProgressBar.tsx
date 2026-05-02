@@ -3,6 +3,8 @@ export interface BpProgressBarProps {
   label?: string
   showValue?: boolean
   className?: string
+  'data-testid'?: string
+  'aria-valuenow'?: number
 }
 
 function getFillColor(value: number): string {
@@ -11,12 +13,12 @@ function getFillColor(value: number): string {
   return 'var(--bp-positive)'
 }
 
-export function BpProgressBar({ value, label, showValue = false, className }: BpProgressBarProps) {
+export function BpProgressBar({ value, label, showValue = false, className, 'data-testid': testId, 'aria-valuenow': ariaValueNow }: BpProgressBarProps) {
   const fillWidth = Math.min(value, 100)
   const fillColor = getFillColor(value)
 
   return (
-    <div className={className} style={{ width: '100%' }}>
+    <div className={className} style={{ width: '100%' }} data-testid={testId} aria-valuenow={ariaValueNow}>
       {(label || showValue) && (
         <div
           style={{

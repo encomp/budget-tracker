@@ -33,7 +33,7 @@ function Stepper({ stage }: { stage: Stage }) {
     { key: 'review', label: '3. Review' },
   ]
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+    <div data-testid="import-stepper" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
       {steps.map((s, i) => {
         const isActive = s.key === stage
         const isDone = steps.findIndex((x) => x.key === stage) > i
@@ -276,7 +276,7 @@ export default function Import() {
 
       {/* Detected bank toast banner */}
       {detectedBank && (
-        <div style={{ background: 'var(--bp-bg-surface)', border: '1px solid var(--bp-border)', borderLeft: '4px solid var(--bp-positive)', borderRadius: 'var(--bp-radius-md)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div data-testid="toast-bank-detected" style={{ background: 'var(--bp-bg-surface)', border: '1px solid var(--bp-border)', borderLeft: '4px solid var(--bp-positive)', borderRadius: 'var(--bp-radius-md)', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <CheckCircle size={16} style={{ color: 'var(--bp-positive)', flexShrink: 0 }} />
           <span style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-primary)' }}>
             {detectedBank} detected. Mapping applied automatically.
@@ -292,7 +292,7 @@ export default function Import() {
               <p style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '14px', color: 'var(--bp-text-secondary)', textAlign: 'center' }}>
                 Import transactions from your bank's CSV export.
               </p>
-              <input ref={fileInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f) }} />
+              <input ref={fileInputRef} data-testid="import-file-input" type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f) }} />
               <div style={{ width: '80%' }}>
                 <BpButton variant="primary" icon={<Upload size={15} />} onClick={() => fileInputRef.current?.click()}>
                   Select File from Device
@@ -302,6 +302,7 @@ export default function Import() {
           ) : (
             <div
               ref={dropZoneRef}
+              data-testid="import-dropzone"
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
               onClick={() => fileInputRef.current?.click()}
@@ -321,7 +322,7 @@ export default function Import() {
               )}
             </div>
           )}
-          <input ref={!isMobile ? fileInputRef : undefined} type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f) }} />
+          <input ref={!isMobile ? fileInputRef : undefined} data-testid="import-file-input" type="file" accept=".csv" style={{ display: 'none' }} onChange={(e) => { const f = e.target.files?.[0]; if (f) processFile(f) }} />
         </BpCard>
       )}
 
@@ -385,7 +386,7 @@ export default function Import() {
           )}
 
           <div style={{ marginTop: '16px', display: 'flex', justifyContent: isMobile ? 'stretch' : 'flex-end' }}>
-            <BpButton variant="primary" disabled={!isComplete} onClick={handleConfirmMapping}>
+            <BpButton variant="primary" disabled={!isComplete} onClick={handleConfirmMapping} data-testid="import-confirm-mapping">
               Confirm Mapping
             </BpButton>
           </div>
@@ -524,7 +525,7 @@ export default function Import() {
 
           {/* Desktop table */}
           {!isMobile && preview.length > 0 && (
-            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            <div data-testid="import-preview-table" style={{ maxHeight: '400px', overflowY: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
@@ -547,6 +548,7 @@ export default function Import() {
                       <tr
                         key={i}
                         ref={(el) => { conflictRowRefs.current[i] = el }}
+                        data-testid="preview-row"
                         style={{ borderLeft: isConflict ? '3px solid var(--bp-warning)' : undefined }}
                       >
                         <td style={tdStyle}>{item.date}</td>
@@ -668,6 +670,7 @@ export default function Import() {
                 <BpButton
                   variant="primary"
                   loading={importing}
+                  data-testid="import-confirm-button"
                   onClick={() => {
                     if (ruleConflicts.length > 0) {
                       setShowConflictWarning(true)

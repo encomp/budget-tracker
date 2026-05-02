@@ -144,7 +144,7 @@ export default function ExportImport() {
             Downloads a full JSON backup of all your transactions, budget settings, debts, categories, and app settings.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)' }}>
+            <span data-testid="last-export-date" style={{ fontSize: '13px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)' }}>
               {lastExportLabel}
             </span>
             <BpButton
@@ -152,6 +152,7 @@ export default function ExportImport() {
               icon={<Download size={14} />}
               loading={exporting}
               onClick={handleExport}
+              data-testid="export-button"
             >
               Export Backup
             </BpButton>
@@ -198,6 +199,7 @@ export default function ExportImport() {
                 onChange={handleFileSelect}
                 style={{ display: 'none' }}
                 id="import-file-input"
+                data-testid="restore-file-input"
               />
               <BpButton
                 variant="secondary"
@@ -226,6 +228,7 @@ export default function ExportImport() {
         title="Restore Backup"
         description="Review what will be restored before confirming."
         size="sm"
+        data-testid="restore-confirm-modal"
         footer={
           <>
             <BpButton
