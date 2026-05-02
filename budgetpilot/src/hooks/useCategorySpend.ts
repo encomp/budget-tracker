@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { db } from '../lib/db'
 import type { CategorySpend } from '../types'
 
-export function useCategorySpend(month: string, categoryId: string): CategorySpend {
+export function useCategorySpend(month: string, categoryId: string): CategorySpend | undefined {
   return useLiveQuery(async () => {
     const budget = await db.budgets.where('month').equals(month).first()
     const limit = budget?.categoryLimits.find(cl => cl.categoryId === categoryId)?.limit ?? 0
@@ -16,5 +16,5 @@ export function useCategorySpend(month: string, categoryId: string): CategorySpe
     const pct = limit > 0 ? Math.round((spent / limit) * 100) : 0
 
     return { spent, limit, pct }
-  }, [month, categoryId], { spent: 0, limit: 0, pct: 0 })!
+  }, [month, categoryId])
 }

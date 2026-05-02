@@ -103,10 +103,10 @@ function CategoryRow({
   const spend = useCategorySpend(month, category.id)
   const [editing, setEditing] = React.useState(false)
   const [nameVal, setNameVal] = React.useState(category.name)
-  const [limitVal, setLimitVal] = React.useState(String(spend.limit))
+  const [limitVal, setLimitVal] = React.useState('0')
 
   React.useEffect(() => { setNameVal(category.name) }, [category.name])
-  React.useEffect(() => { setLimitVal(String(spend.limit)) }, [spend.limit])
+  React.useEffect(() => { if (spend !== undefined) setLimitVal(String(spend.limit)) }, [spend?.limit])
 
   return (
     <div
@@ -182,10 +182,14 @@ function CategoryRow({
           <Trash2 size={12} />
         </button>
       </div>
-      <BpProgressBar value={spend.pct} data-testid={`progress-bar-${category.id}`} aria-valuenow={Math.round(spend.pct)} />
+      <BpProgressBar
+        value={spend?.pct ?? 0}
+        data-testid={spend !== undefined ? `progress-bar-${category.id}` : undefined}
+        aria-valuenow={spend !== undefined ? Math.round(spend.pct) : undefined}
+      />
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-mono)' }}>
-        <span>${spend.spent.toFixed(0)} spent</span>
-        <span>${spend.limit.toFixed(0)} limit</span>
+        <span>${(spend?.spent ?? 0).toFixed(0)} spent</span>
+        <span>${(spend?.limit ?? 0).toFixed(0)} limit</span>
       </div>
     </div>
   )
