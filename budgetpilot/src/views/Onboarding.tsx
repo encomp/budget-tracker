@@ -154,8 +154,8 @@ export function Onboarding({ breakpoint, onComplete }: OnboardingProps) {
   const steps: Step[] = ['A', 'B', 'C']
 
   return (
-    <div data-testid="onboarding-modal" style={overlayStyle}>
-      <div style={cardStyle}>
+    <div style={overlayStyle}>
+      <div data-testid="onboarding-modal" style={cardStyle}>
         {/* Dot stepper */}
         <div data-testid="onboarding-step-indicator" style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
           {steps.map(s => (
