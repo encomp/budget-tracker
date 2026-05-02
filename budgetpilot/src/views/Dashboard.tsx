@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { ResponsivePie } from '@nivo/pie'
 import { ResponsiveBar } from '@nivo/bar'
-import { motion } from 'motion/react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useAppStore } from '../store/useAppStore'
 import { useMonthlyTotals } from '../hooks/useMonthlyTotals'
 import { useRecentTransactions } from '../hooks/useRecentTransactions'
@@ -167,44 +167,6 @@ const sectionLabel: React.CSSProperties = {
   letterSpacing: '0.05em',
 }
 
-function BudgetLabelLayer(props: Record<string, unknown>) {
-  const bars = props.bars as Array<{
-    key: string
-    x: number
-    y: number
-    width: number
-    height: number
-    data: { id: string | number; data: BudgetBarDatum }
-  }>
-  const innerWidth = props.innerWidth as number
-
-  return (
-    <>
-      {bars
-        .filter(bar => bar.data.id === 'spent')
-        .map(bar => {
-          const d = bar.data.data
-          const label = `$${d.actualSpent.toFixed(0)} / $${d.limit.toFixed(0)}${d.isOver ? ' ⚠' : ''}`
-          return (
-            <text
-              key={bar.key}
-              x={innerWidth + 8}
-              y={bar.y + bar.height / 2}
-              textAnchor="start"
-              dominantBaseline="middle"
-              style={{
-                fontSize: '11px',
-                fontFamily: 'var(--bp-font-ui)',
-                fill: d.isOver ? 'var(--bp-danger)' : 'var(--bp-text-secondary)',
-              }}
-            >
-              {label}
-            </text>
-          )
-        })}
-    </>
-  )
-}
 
 export default function Dashboard() {
   const activeMonth = useAppStore((s) => s.activeMonth)
@@ -710,41 +672,59 @@ export default function Dashboard() {
           <BpCard padding="md">
             <div style={{ ...sectionLabel, marginBottom: '16px' }}>Budget vs Actual</div>
             {budgetBarData.length > 0 ? (
-              <div style={{ height: `${budgetChartHeight}px` }}>
-                <ResponsiveBar<BudgetBarDatum>
-                  data={budgetBarData}
-                  keys={['spent', 'remaining']}
-                  indexBy="category"
-                  layout="horizontal"
-                  groupMode="stacked"
-                  theme={nivoTheme}
-                  colors={(bar) => {
-                    if (bar.id === 'remaining') return 'var(--bp-border)'
-                    return bar.data.isOver ? 'var(--bp-danger)' : 'var(--bp-positive)'
-                  }}
-                  margin={{ top: 4, right: 140, bottom: 4, left: 88 }}
-                  padding={0.3}
-                  borderRadius={3}
-                  axisBottom={null}
-                  axisLeft={{
-                    tickSize: 0,
-                    tickPadding: 8,
-                  }}
-                  enableLabel={false}
-                  enableGridX={false}
-                  enableGridY={false}
-                  animate
-                  motionConfig="gentle"
-                  layers={[
-                    'grid',
-                    'axes',
-                    'bars',
-                    'markers',
-                    'legends',
-                    'annotations',
-                    BudgetLabelLayer as (props: Record<string, unknown>) => React.ReactNode,
-                  ]}
-                />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {budgetBarData.map(d => (
+                  <div key={d.category} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div
+                      style={{
+                        width: isMobile ? '70px' : '88px',
+                        textAlign: 'right',
+                        fontFamily: 'var(--bp-font-ui)',
+                        fontSize: '12px',
+                        color: 'var(--bp-text-secondary)',
+                        flexShrink: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {d.category}
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: '20px',
+                        background: 'var(--bp-border)',
+                        borderRadius: '3px',
+                        overflow: 'hidden',
+                        minWidth: 0,
+                      }}
+                    >
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${Math.min(100, d.limit > 0 ? (d.actualSpent / d.limit) * 100 : 0)}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                        style={{
+                          height: '100%',
+                          background: d.isOver ? 'var(--bp-danger)' : 'var(--bp-positive)',
+                          borderRadius: '3px',
+                        }}
+                      />
+                    </div>
+                    <div
+                      style={{
+                        width: isMobile ? '100px' : '130px',
+                        fontFamily: 'var(--bp-font-ui)',
+                        fontSize: '11px',
+                        color: d.isOver ? 'var(--bp-danger)' : 'var(--bp-text-secondary)',
+                        flexShrink: 0,
+                        whiteSpace: 'nowrap',
+                      }}
+                    >
+                      ${d.actualSpent.toFixed(0)} / ${d.limit.toFixed(0)}{d.isOver ? ' ⚠' : ''}
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <BpEmptyState
