@@ -262,7 +262,7 @@ function SwipeCard({
         <span style={{ fontFamily: 'var(--bp-font-mono)', fontSize: '15px', fontWeight: 500, color: txn.type === 'expense' ? 'var(--bp-danger)' : 'var(--bp-positive)', flexShrink: 0 }}>
           {txn.type === 'expense' ? '-' : '+'}${txn.amount.toFixed(2)}
         </span>
-        <BpBadge variant={txn.importSource === 'csv' ? 'csv' : 'manual'} />
+        <BpBadge variant={txn.importSource === 'csv' ? 'csv' : 'manual'} data-testid="badge-source" />
       </div>
     </div>
   )

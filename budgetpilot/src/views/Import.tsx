@@ -421,6 +421,7 @@ export default function Import() {
                 return (
                   <div
                     key={i}
+                    data-testid="preview-row"
                     ref={(el) => { conflictRowRefs.current[i] = el }}
                     style={{
                       background: 'var(--bp-bg-surface-alt)',

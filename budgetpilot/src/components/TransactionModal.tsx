@@ -151,6 +151,7 @@ export function TransactionModal({
             }}
           >
             <button
+              data-testid="txn-cancel"
               onClick={() => onOpenChange(false)}
               style={{
                 background: 'none',
@@ -175,6 +176,7 @@ export function TransactionModal({
               {editTransaction ? 'Edit Transaction' : 'Add Transaction'}
             </span>
             <BpButton
+              data-testid="txn-save"
               variant="primary"
               size="sm"
               loading={saving}
@@ -198,6 +200,22 @@ export function TransactionModal({
           >
             ${numpadAmount}
           </div>
+          {/* Visually hidden input so Playwright can fill the amount via data-testid="txn-amount" */}
+          <input
+            data-testid="txn-amount"
+            type="text"
+            value={numpadAmount}
+            onChange={(e) => setNumpadAmount(e.target.value || '0')}
+            style={{
+              position: 'absolute',
+              width: '1px',
+              height: '1px',
+              opacity: 0.01,
+              border: 'none',
+              padding: 0,
+              overflow: 'hidden',
+            }}
+          />
 
           {/* Type toggle */}
           <Controller
@@ -215,6 +233,7 @@ export function TransactionModal({
                 {(['expense', 'income'] as const).map((t) => (
                   <button
                     key={t}
+                    data-testid={t === 'expense' ? 'txn-type-expense' : 'txn-type-income'}
                     onClick={() => field.onChange(t)}
                     style={{
                       flex: 1,
@@ -246,6 +265,7 @@ export function TransactionModal({
               control={control}
               render={({ field }) => (
                 <BpSelect
+                  data-testid="txn-category"
                   options={categoryOptions}
                   value={field.value}
                   onValueChange={field.onChange}
