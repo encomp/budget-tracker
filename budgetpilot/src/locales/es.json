@@ -41,6 +41,11 @@
     "profile": "Perfil",
     "dangerZone": "Zona de peligro"
   },
+  "theme": {
+    "contrastWarning": "⚠ Contraste bajo en {{count}} par(es) de colores. Puede ser difícil de leer.",
+    "contrastWarningDetail": "{{pair}}: {{ratio}}:1 (mínimo {{threshold}}:1)",
+    "contrastWarningStillApply": "Aún puedes aplicar este tema."
+  },
   "components": {
     "loading": "Cargando…",
     "addTransaction": "Agregar transacción",
