@@ -40,5 +40,19 @@
     "appearance": "Appearance",
     "profile": "Profile",
     "dangerZone": "Danger Zone"
+  },
+  "components": {
+    "loading": "Loading…",
+    "addTransaction": "Add transaction",
+    "progressBar": {
+      "overLimit": "Over limit",
+      "approaching": "Approaching limit",
+      "healthy": "Under budget"
+    },
+    "confirmDialog": {
+      "defaultTitle": "Are you sure?",
+      "defaultConfirm": "Confirm",
+      "defaultCancel": "Cancel"
+    }
   }
 }

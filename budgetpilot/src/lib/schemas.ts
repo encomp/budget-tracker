@@ -1,6 +1,12 @@
 import { z } from 'zod'
 import { isValid, parseISO } from 'date-fns'
 
+export const VALIDATION_KEYS = {
+  required: 'errors.required',
+  invalidDate: 'errors.invalidDate',
+  positiveNumber: 'errors.positiveNumber',
+} as const
+
 export const DateSchema = z.string().refine(
   (val) => isValid(parseISO(val)),
   { message: 'Invalid date. Expected YYYY-MM-DD.' }

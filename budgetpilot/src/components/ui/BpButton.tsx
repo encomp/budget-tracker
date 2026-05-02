@@ -15,6 +15,7 @@ export interface BpButtonProps {
   className?: string
   type?: 'button' | 'submit' | 'reset'
   style?: React.CSSProperties
+  'aria-label'?: string
   'data-testid'?: string
 }
 
@@ -58,6 +59,7 @@ export function BpButton({
   className,
   type = 'button',
   style: styleProp,
+  'aria-label': ariaLabel,
   'data-testid': testId,
 }: BpButtonProps) {
   const [hovered, setHovered] = React.useState(false)
@@ -96,6 +98,7 @@ export function BpButton({
       style={style}
       onClick={!isDisabled ? onClick : undefined}
       disabled={isDisabled}
+      aria-label={ariaLabel}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={className}
