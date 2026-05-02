@@ -483,13 +483,13 @@ export default function ImportRules() {
       </div>
 
       {/* Content */}
-      {rules.length === 0 ? (
+      {rules.length === 0 && addForm === null ? (
         <BpEmptyState
           heading="No import rules yet"
           subtext="Rules are created automatically when you assign categories during CSV import, or add one manually."
           action={{ label: '+ Add your first rule', onClick: () => setAddForm({ keyword: '', categoryId: '' }) }}
         />
-      ) : filtered.length === 0 && search ? (
+      ) : filtered.length === 0 && search && addForm === null ? (
         <BpEmptyState
           heading={`No rules matching "${search}"`}
           subtext="Try a different keyword."
