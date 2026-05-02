@@ -292,33 +292,37 @@ export default function ImportRules() {
                           >
                             <Pencil size={14} />
                           </button>
-                          {isConfirmingDelete ? (
-                            <>
-                              <button onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-confirm-${rule.normalizedDescription}`} style={{ ...iconBtnStyle, color: 'var(--bp-danger)', fontFamily: 'var(--bp-font-ui)', fontSize: '12px' }}>Confirm?</button>
-                              <button onClick={() => setConfirmDeleteKey(null)} data-testid={`import-rule-delete-cancel-${rule.normalizedDescription}`} style={iconBtnStyle}>Cancel</button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => handleSingleDeleteClick(rule.normalizedDescription)}
-                              title="Delete"
-                              data-testid={`import-rule-delete-${rule.normalizedDescription}`}
-                              style={{ ...iconBtnStyle, color: 'var(--bp-danger)' }}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          )}
+                          <div aria-live="polite" aria-atomic="true" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            {isConfirmingDelete ? (
+                              <>
+                                <button onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-confirm-${rule.normalizedDescription}`} style={{ ...iconBtnStyle, color: 'var(--bp-danger)', fontFamily: 'var(--bp-font-ui)', fontSize: '12px' }}>Confirm?</button>
+                                <button onClick={() => setConfirmDeleteKey(null)} data-testid={`import-rule-delete-cancel-${rule.normalizedDescription}`} style={iconBtnStyle}>Cancel</button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={() => handleSingleDeleteClick(rule.normalizedDescription)}
+                                title="Delete"
+                                data-testid={`import-rule-delete-${rule.normalizedDescription}`}
+                                style={{ ...iconBtnStyle, color: 'var(--bp-danger)' }}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            )}
+                          </div>
                         </>
                       ) : (
                         <>
                           <BpButton variant="ghost" size="sm" onClick={() => startEdit(rule)} data-testid={`import-rule-edit-${rule.normalizedDescription}`}>Edit</BpButton>
-                          {isConfirmingDelete ? (
-                            <>
-                              <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-confirm-${rule.normalizedDescription}`}>Confirm?</BpButton>
-                              <BpButton variant="ghost" size="sm" onClick={() => setConfirmDeleteKey(null)} data-testid={`import-rule-delete-cancel-${rule.normalizedDescription}`}>Cancel</BpButton>
-                            </>
-                          ) : (
-                            <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-${rule.normalizedDescription}`}>Del</BpButton>
-                          )}
+                          <div aria-live="polite" aria-atomic="true" style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            {isConfirmingDelete ? (
+                              <>
+                                <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-confirm-${rule.normalizedDescription}`}>Confirm?</BpButton>
+                                <BpButton variant="ghost" size="sm" onClick={() => setConfirmDeleteKey(null)} data-testid={`import-rule-delete-cancel-${rule.normalizedDescription}`}>Cancel</BpButton>
+                              </>
+                            ) : (
+                              <BpButton variant="danger" size="sm" onClick={() => handleSingleDeleteClick(rule.normalizedDescription)} data-testid={`import-rule-delete-${rule.normalizedDescription}`}>Del</BpButton>
+                            )}
+                          </div>
                         </>
                       )}
                     </div>

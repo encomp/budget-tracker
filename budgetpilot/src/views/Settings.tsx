@@ -350,6 +350,7 @@ export default function Settings() {
   const { t, i18n } = useTranslation()
   const setActiveView = useAppStore((s) => s.setActiveView)
   const activeTheme = useAppStore((s) => s.activeTheme)
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(false)
   const setActiveTheme = useAppStore((s) => s.setActiveTheme)
   const installedThemes = useAppStore((s) => s.installedThemes)
   const addInstalledTheme = useAppStore((s) => s.addInstalledTheme)
@@ -377,6 +378,14 @@ export default function Settings() {
       if (p) resetForm({ name: p.name, currency: p.currency })
     })
   }, [resetForm])
+
+  React.useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   async function onProfileSave(values: ProfileFormValues) {
     await db.profile.put({ name: values.name, currency: values.currency, createdAt: new Date().toISOString() })
@@ -503,6 +512,28 @@ export default function Settings() {
       {/* Appearance */}
       <BpCard padding="md" data-testid="theme-gallery">
         <SectionTitle>{t('settings.appearance')}</SectionTitle>
+
+        {/* Reduced motion banner */}
+        {prefersReducedMotion && (
+          <div
+            data-testid="reduced-motion-banner"
+            role="alert"
+            aria-live="assertive"
+            style={{
+              marginTop: '12px',
+              background: 'var(--bp-bg-surface-alt)',
+              border: '1px solid var(--bp-border)',
+              borderLeft: '4px solid var(--bp-accent)',
+              borderRadius: 'var(--bp-radius-md)',
+              padding: '10px 14px',
+              fontFamily: 'var(--bp-font-ui)',
+              fontSize: '13px',
+              color: 'var(--bp-text-secondary)',
+            }}
+          >
+            Reduced motion is enabled. Animations are minimized.
+          </div>
+        )}
 
         {/* BUNDLED themes */}
         <div data-testid="theme-gallery-bundled" style={{ marginTop: '16px' }}>

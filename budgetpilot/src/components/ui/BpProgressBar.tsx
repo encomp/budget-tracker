@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 export interface BpProgressBarProps {
   value: number
   label?: string
@@ -13,12 +15,24 @@ function getFillColor(value: number): string {
   return 'var(--bp-positive)'
 }
 
-export function BpProgressBar({ value, label, showValue = false, className, 'data-testid': testId, 'aria-valuenow': ariaValueNow }: BpProgressBarProps) {
+export function BpProgressBar({ value, label, showValue = false, className, 'data-testid': testId }: BpProgressBarProps) {
+  const { t } = useTranslation()
   const fillWidth = Math.min(value, 100)
   const fillColor = getFillColor(value)
+  const valuenow = Math.min(Math.round(value), 100)
+  const ariaLabel = label ?? t('components.progressBar.label', { value: Math.round(value) })
 
   return (
-    <div className={className} style={{ width: '100%' }} data-testid={testId} aria-valuenow={ariaValueNow}>
+    <div
+      className={className}
+      style={{ width: '100%' }}
+      data-testid={testId}
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={valuenow}
+      aria-label={ariaLabel}
+    >
       {(label || showValue) && (
         <div
           style={{
