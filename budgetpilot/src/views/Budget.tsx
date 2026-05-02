@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { format, addMonths, subMonths, parseISO } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { categoryNameToSlot } from '../lib/themeUtils'
 import { ThemeIcon } from '../components/ThemeIcon'
 import { useAppStore } from '../store/useAppStore'
@@ -19,10 +20,10 @@ import { ONBOARDING_CATEGORIES } from '../lib/defaults'
 import { db } from '../lib/db'
 import type { BpBudget, BpCategory, AllocationGroup } from '../types'
 
-const GROUP_LABELS: Record<AllocationGroup, string> = {
-  needs: 'Needs',
-  wants: 'Wants',
-  savings: 'Savings',
+const GROUP_LABEL_KEYS: Record<AllocationGroup, string> = {
+  needs: 'budget.needs',
+  wants: 'budget.wants',
+  savings: 'budget.savings',
 }
 
 const GROUP_COLORS: Record<AllocationGroup, string> = {
@@ -100,6 +101,7 @@ function CategoryRow({
   onDelete: (id: string) => void
   onLimitChange: (id: string, limit: number) => void
 }) {
+  const { t: tBudget } = useTranslation()
   const spend = useCategorySpend(month, category.id)
   const [editing, setEditing] = React.useState(false)
   const [nameVal, setNameVal] = React.useState(category.name)
@@ -188,8 +190,8 @@ function CategoryRow({
         aria-valuenow={spend !== undefined ? Math.round(spend.pct) : undefined}
       />
       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-mono)' }}>
-        <span>${(spend?.spent ?? 0).toFixed(0)} spent</span>
-        <span>${(spend?.limit ?? 0).toFixed(0)} limit</span>
+        <span>${(spend?.spent ?? 0).toFixed(0)} {tBudget('budget.spent')}</span>
+        <span>${(spend?.limit ?? 0).toFixed(0)} {tBudget('budget.limit')}</span>
       </div>
     </div>
   )
@@ -202,6 +204,7 @@ function GroupSection({
   onRename: (id: string, name: string) => void; onDelete: (id: string) => void
   onAddCategory: (group: AllocationGroup) => void; onLimitChange: (id: string, limit: number) => void
 }) {
+  const { t } = useTranslation()
   const [collapsed, setCollapsed] = React.useState(false)
   const groupCats = (budget.categories ?? []).filter((c) => c.group === group)
   const alloc = budget.allocation[group]
@@ -215,7 +218,7 @@ function GroupSection({
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: GROUP_COLORS[group], flexShrink: 0 }} />
         <span style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '14px', fontWeight: 600, color: 'var(--bp-text-primary)' }}>
-          {GROUP_LABELS[group]}
+          {t(GROUP_LABEL_KEYS[group])}
         </span>
         <span style={{ fontFamily: 'var(--bp-font-mono)', fontSize: '12px', color: GROUP_COLORS[group] }}>
           {alloc}% · ${amount.toLocaleString()}
@@ -231,7 +234,7 @@ function GroupSection({
         <CategoryRow key={cat.id} category={cat} month={month} onRename={onRename} onDelete={onDelete} onLimitChange={onLimitChange} />
       ))}
       <BpButton variant="ghost" size="sm" icon={<Plus size={13} />} onClick={() => onAddCategory(group)} data-testid={`add-category-${group}`}>
-        Add Category
+        {t('budget.addCategory')}
       </BpButton>
     </div>
   )
@@ -254,6 +257,7 @@ function GroupSection({
 }
 
 export default function Budget() {
+  const { t } = useTranslation()
   const activeMonth = useAppStore((s) => s.activeMonth)
   const setActiveMonth = useAppStore((s) => s.setActiveMonth)
   const breakpoint = useBreakpoint()
@@ -294,7 +298,7 @@ export default function Budget() {
         }
 
     const id = await db.budgets.add(newBudget as BpBudget)
-    showToast('New month created. Customize your budget below.', 'info')
+    showToast(t('budget.newMonthCreated'), 'info')
     return { ...newBudget, id } as BpBudget
   }
 
@@ -365,7 +369,7 @@ export default function Budget() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <h1 style={{ fontFamily: 'var(--bp-font-ui)', fontSize: isMobile ? '20px' : '24px', fontWeight: 700, color: 'var(--bp-text-primary)' }}>
-          Budget Planner
+          {t('budget.title')}
         </h1>
         <MonthPicker month={activeMonth} onChange={setActiveMonth} />
       </div>
@@ -386,14 +390,14 @@ export default function Budget() {
       <BpCard padding="md">
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '24px', alignItems: isMobile ? 'stretch' : 'flex-start' }}>
           <div style={{ flex: '0 0 auto', minWidth: '200px' }}>
-            <BpInput mono label="Expected Monthly Income" type="number" min="0" step="100" value={income} onChange={(e) => setIncome(e.target.value)} onBlur={handleIncomeBlur} placeholder="0" data-testid="budget-income-input" />
+            <BpInput mono label={t('budget.monthlyIncome')} type="number" min="0" step="100" value={income} onChange={(e) => setIncome(e.target.value)} onBlur={handleIncomeBlur} placeholder="0" data-testid="budget-income-input" />
           </div>
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {groups.map((key) => (
               <div key={key}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                   <span style={{ fontSize: '13px', color: GROUP_COLORS[key], fontFamily: 'var(--bp-font-ui)', fontWeight: 500 }}>
-                    {GROUP_LABELS[key]} (<span data-testid={`allocation-value-${key}`}>{sliders[key]}</span>%)
+                    {t(GROUP_LABEL_KEYS[key])} (<span data-testid={`allocation-value-${key}`}>{sliders[key]}</span>%)
                   </span>
                   <span style={{ fontSize: '13px', fontFamily: 'var(--bp-font-mono)', color: GROUP_COLORS[key] }}>
                     ${Math.round(incomeNum * sliders[key] / 100).toLocaleString()}
@@ -415,8 +419,8 @@ export default function Budget() {
       {/* Empty categories state */}
       {(budget.categories ?? []).length === 0 && (
         <BpEmptyState
-          heading="Add categories to start tracking spending"
-          subtext="Use the Add Category buttons below each group to create budget categories."
+          heading={t('budget.noCategories')}
+          subtext={t('budget.addCategory')}
         />
       )}
 

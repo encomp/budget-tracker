@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { format, parseISO } from 'date-fns'
 import { ResponsiveBar } from '@nivo/bar'
 import { Pencil, Trash2, CreditCard } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useDebtList } from '../hooks/useDebtList'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { useNivoTheme } from '../components/ui/NivoTheme'
@@ -147,6 +148,7 @@ function DebtForm({ initial, onSave, onCancel }: DebtFormProps) {
 }
 
 export default function Debts() {
+  const { t } = useTranslation()
   const debts = useDebtList()
   const breakpoint = useBreakpoint()
   const nivoTheme = useNivoTheme()
@@ -204,14 +206,14 @@ export default function Debts() {
       <div style={{ padding: '2rem', color: 'var(--bp-text-primary)' }}>
         <BpEmptyState
           icon={<CreditCard size={48} />}
-          heading="No debts tracked yet"
+          heading={t('debts.noDebts')}
           subtext="Add your debts to start planning your payoff strategy."
-          action={{ label: 'Add Your First Debt', onClick: () => setAddingDebt(true) }}
+          action={{ label: t('debts.addFirstDebt'), onClick: () => setAddingDebt(true) }}
         />
         <BpModal
           open={addingDebt}
           onOpenChange={setAddingDebt}
-          title="Add Debt"
+          title={t('debts.addDebt')}
           size="sm"
         >
           <DebtForm onSave={() => setAddingDebt(false)} onCancel={() => setAddingDebt(false)} />
@@ -232,17 +234,17 @@ export default function Debts() {
       }}
     >
       <MetricPill
-        label="Total Debt"
+        label={t('debts.totalDebt')}
         value={`$${totalDebt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
       />
       <MetricPill
-        label="Interest Saved"
+        label={t('debts.interestSaved')}
         value={`$${interestComparison.saved.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
         valueColor="var(--bp-positive)"
         valueTestId="interest-saved-value"
       />
       <MetricPill
-        label="Debt-Free Date"
+        label={t('debts.debtFreeDate')}
         value={debtFreeDate ? format(parseISO(debtFreeDate), 'MMM yyyy') : '—'}
         valueTestId="debt-free-date"
       />
@@ -257,7 +259,7 @@ export default function Debts() {
         size="sm"
         data-testid="method-toggle-snowball"
       >
-        Snowball
+        {t('debts.snowball')}
       </BpButton>
       <BpButton
         variant={method === 'avalanche' ? 'primary' : 'secondary'}
@@ -265,11 +267,11 @@ export default function Debts() {
         size="sm"
         data-testid="method-toggle-avalanche"
       >
-        Avalanche
+        {t('debts.avalanche')}
       </BpButton>
       <div style={{ flex: 1 }} />
       <BpButton variant="secondary" size="sm" onClick={() => setAddingDebt(true)}>
-        + Add Debt
+        {t('debts.addDebt')}
       </BpButton>
     </div>
   )
@@ -467,7 +469,7 @@ export default function Debts() {
           color: 'var(--bp-text-primary)',
         }}
       >
-        Debt Payoff Planner
+        {t('debts.title')}
       </h1>
 
       {summaryBar}
@@ -478,7 +480,7 @@ export default function Debts() {
       <BpModal
         open={addingDebt}
         onOpenChange={setAddingDebt}
-        title="Add Debt"
+        title={t('debts.addDebt')}
         size="sm"
       >
         <DebtForm onSave={() => setAddingDebt(false)} onCancel={() => setAddingDebt(false)} />
@@ -488,7 +490,7 @@ export default function Debts() {
       <BpModal
         open={editingDebt !== null}
         onOpenChange={(open) => { if (!open) setEditingDebt(null) }}
-        title="Edit Debt"
+        title={t('debts.editDebt')}
         size="sm"
       >
         {editingDebt && (

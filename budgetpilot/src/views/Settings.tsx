@@ -454,12 +454,12 @@ export default function Settings() {
   return (
     <div style={{ padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: '24px', maxWidth: '700px' }}>
       <h1 style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '24px', fontWeight: 700, color: 'var(--bp-text-primary)' }}>
-        Settings
+        {t('nav.settings')}
       </h1>
 
       {/* Profile */}
       <BpCard padding="md">
-        <SectionTitle>Profile</SectionTitle>
+        <SectionTitle>{t('settings.profile')}</SectionTitle>
         <form onSubmit={handleSubmit(onProfileSave)} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
           <BpInput label="Name" placeholder="Your name" error={errors.name?.message} data-testid="settings-profile-name" {...register('name')} />
           <BpInput label="Currency Symbol" placeholder="$" maxLength={3} error={errors.currency?.message} data-testid="settings-profile-currency" {...register('currency')} />
@@ -490,9 +490,9 @@ export default function Settings() {
         <div style={{ marginTop: '8px' }}>
           <button onClick={() => setActiveView('import-rules')} style={settingsRowStyle}>
             <div style={settingsRowLabelStyle}>
-              <span style={settingsRowTitleStyle}>Import Rules</span>
+              <span style={settingsRowTitleStyle}>{t('importRules.title')}</span>
               <span style={settingsRowSubStyle}>
-                Manage category rules applied automatically during CSV import
+                {t('importRules.subtitle')}
               </span>
             </div>
             <ChevronRight size={16} style={{ color: 'var(--bp-text-muted)', flexShrink: 0 }} />
@@ -502,7 +502,7 @@ export default function Settings() {
 
       {/* Appearance */}
       <BpCard padding="md" data-testid="theme-gallery">
-        <SectionTitle>Appearance</SectionTitle>
+        <SectionTitle>{t('settings.appearance')}</SectionTitle>
 
         {/* BUNDLED themes */}
         <div data-testid="theme-gallery-bundled" style={{ marginTop: '16px' }}>
@@ -593,7 +593,7 @@ export default function Settings() {
 
       {/* Danger Zone */}
       <BpCard padding="md">
-        <SectionTitle>Danger Zone</SectionTitle>
+        <SectionTitle>{t('settings.dangerZone')}</SectionTitle>
         <div style={{ marginTop: '16px' }}>
           <p style={{ fontSize: '13px', color: 'var(--bp-text-secondary)', fontFamily: 'var(--bp-font-ui)', marginBottom: '12px' }}>
             Permanently erase all transactions, budgets, and settings.

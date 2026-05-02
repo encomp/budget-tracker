@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { ResponsivePie } from '@nivo/pie'
 import { ResponsiveBar } from '@nivo/bar'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { useMonthlyTotals } from '../hooks/useMonthlyTotals'
 import { useRecentTransactions } from '../hooks/useRecentTransactions'
@@ -255,6 +256,7 @@ function ReducedMotionBanner() {
 }
 
 export default function Dashboard() {
+  const { t } = useTranslation()
   const activeMonth = useAppStore((s) => s.activeMonth)
   const setActiveMonth = useAppStore((s) => s.setActiveMonth)
   const setActiveView = useAppStore((s) => s.setActiveView)
@@ -345,7 +347,7 @@ export default function Dashboard() {
         .filter(([, v]) => v > 0)
         .map(([id, value], i) => ({
           id,
-          label: catMap[id] ?? (id === '__none__' ? 'Uncategorized' : id),
+          label: catMap[id] ?? (id === '__none__' ? t('transactions.uncategorized') : id),
           value,
           color: SLICE_COLORS[i % SLICE_COLORS.length],
         })),
@@ -439,12 +441,12 @@ export default function Dashboard() {
               color: 'var(--bp-text-primary)',
             }}
           >
-            Dashboard
+            {t('dashboard.title')}
           </h1>
           <MonthPicker month={activeMonth} onChange={setActiveMonth} />
         </div>
         {lastExport && (
-          <BpBadge variant="muted">Last Export: {formatRelativeExport(lastExport)}</BpBadge>
+          <BpBadge variant="muted">{t('dashboard.lastExport')}: {formatRelativeExport(lastExport)}</BpBadge>
         )}
       </div>
 
@@ -456,16 +458,16 @@ export default function Dashboard() {
           gap: '16px',
         }}
       >
-        <MetricCard label="Income" value={totals.totalIncome} color="var(--bp-positive)" testId="metric-income" />
-        <MetricCard label="Expenses" value={totals.totalExpenses} color="var(--bp-danger)" testId="metric-expenses" />
+        <MetricCard label={t('dashboard.income')} value={totals.totalIncome} color="var(--bp-positive)" testId="metric-income" />
+        <MetricCard label={t('dashboard.expenses')} value={totals.totalExpenses} color="var(--bp-danger)" testId="metric-expenses" />
         <MetricCard
-          label="Remaining"
+          label={t('dashboard.remaining')}
           value={totals.remaining}
           color={totals.remaining >= 0 ? 'var(--bp-positive)' : 'var(--bp-danger)'}
           testId="metric-remaining"
         />
         <MetricCard
-          label="Savings Rate"
+          label={t('dashboard.savingsRate')}
           value={totals.savingsRate}
           prefix=""
           suffix="%"
@@ -483,13 +485,13 @@ export default function Dashboard() {
         }}
       >
         <BpCard padding="md">
-          <div style={{ ...sectionLabel, marginBottom: '12px' }}>Spending Heatmap</div>
+          <div style={{ ...sectionLabel, marginBottom: '12px' }}>{t('dashboard.heatmapTitle')}</div>
           <HeatmapCalendar month={activeMonth} />
         </BpCard>
 
         <BpCard padding="md">
           <div style={{ ...sectionLabel, marginBottom: '12px' }}>
-            Spending by Category
+            {t('dashboard.spendingByCategory')}
             {filteredCategoryId && (
               <button
                 onClick={() => setFilteredCategoryId(null)}
@@ -848,7 +850,7 @@ export default function Dashboard() {
             justifyContent: 'space-between',
           }}
         >
-          <span>Recent Transactions</span>
+          <span>{t('dashboard.recentTransactions')}</span>
           {filteredCategoryId && (
             <span style={{ color: 'var(--bp-accent)', fontSize: '11px' }}>
               Filtered: {catMap[filteredCategoryId] ?? filteredCategoryId}
@@ -919,10 +921,11 @@ export default function Dashboard() {
 }
 
 function EmptyTxnState() {
+  const { t } = useTranslation()
   return (
     <BpEmptyState
-      heading="No transactions yet"
-      subtext="Add your first one using the + button."
+      heading={t('dashboard.noTransactions')}
+      subtext={t('dashboard.noTransactionsHint')}
     />
   )
 }
@@ -973,7 +976,7 @@ function TransactionCard({
           }}
         >
           {txn.categoryId === null ? (
-            <BpBadge variant="warning">Uncategorized</BpBadge>
+            <BpBadge variant="warning">{t('transactions.uncategorized')}</BpBadge>
           ) : catName ? (
             <BpBadge variant="default">{catName}</BpBadge>
           ) : null}
@@ -1056,7 +1059,7 @@ function TransactionTable({
               {t.categoryId && catMap[t.categoryId] ? (
                 <BpBadge variant="default">{catMap[t.categoryId]}</BpBadge>
               ) : (
-                <BpBadge variant="warning">Uncategorized</BpBadge>
+                <BpBadge variant="warning">{t('transactions.uncategorized')}</BpBadge>
               )}
             </td>
             <td

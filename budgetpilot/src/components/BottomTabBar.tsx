@@ -1,21 +1,23 @@
+import { useTranslation } from 'react-i18next'
 import { useAppStore } from '../store/useAppStore'
 import { ThemeIcon } from './ThemeIcon'
 import type { ViewName } from '../types'
 
 interface TabItem {
   view: ViewName
-  label: string
+  labelKey: string
   slot: string
 }
 
 const TABS: TabItem[] = [
-  { view: 'dashboard',    label: 'Home',         slot: 'nav-dashboard' },
-  { view: 'transactions', label: 'Transactions', slot: 'nav-transactions' },
-  { view: 'budget',       label: 'Budget',       slot: 'nav-budget' },
-  { view: 'settings',     label: 'Settings',     slot: 'nav-settings' },
+  { view: 'dashboard',    labelKey: 'nav.dashboard',    slot: 'nav-dashboard' },
+  { view: 'transactions', labelKey: 'nav.transactions', slot: 'nav-transactions' },
+  { view: 'budget',       labelKey: 'nav.budget',       slot: 'nav-budget' },
+  { view: 'settings',     labelKey: 'nav.settings',     slot: 'nav-settings' },
 ]
 
 export function BottomTabBar() {
+  const { t } = useTranslation()
   const activeView = useAppStore(s => s.activeView)
   const setActiveView = useAppStore(s => s.setActiveView)
 
@@ -58,7 +60,7 @@ export function BottomTabBar() {
             }}
           >
             <ThemeIcon slot={tab.slot} size={22} />
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         )
       })}

@@ -9,9 +9,12 @@ import {
   parseISO,
 } from 'date-fns'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { useTranslation } from 'react-i18next'
 import { db } from '../lib/db'
 import { useDailySpend } from '../hooks/useDailySpend'
 import { useActiveBudget } from '../hooks/useActiveBudget'
+import { useAppStore } from '../store/useAppStore'
+import { getWeekdayNames } from '../lib/formatters'
 import type { BpTransaction } from '../types'
 
 export interface HeatmapCalendarProps {
@@ -37,7 +40,7 @@ const HEAT_BG: Record<HeatLevel, string> = {
   high: 'var(--bp-heat-high)',
 }
 
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// WEEKDAYS is now locale-aware via getWeekdayNames(locale) used inside the component
 
 interface TooltipData {
   dateStr: string
@@ -47,6 +50,7 @@ interface TooltipData {
 }
 
 function DayTooltip({ data }: { data: TooltipData }) {
+  const { t } = useTranslation()
   const txns = useLiveQuery(
     () =>
       db.transactions
@@ -83,7 +87,7 @@ function DayTooltip({ data }: { data: TooltipData }) {
       .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
       .map(([id, amt]) => ({
-        name: id === '__uncategorized__' ? 'Uncategorized' : (categoryNames[id] ?? id),
+        name: id === '__uncategorized__' ? t('transactions.uncategorized') : (categoryNames[id] ?? id),
         amt,
       }))
   }, [txns, categoryNames])
@@ -155,6 +159,8 @@ export function HeatmapCalendar({
   dailySpendOverride,
   dailyBudgetOverride,
 }: HeatmapCalendarProps) {
+  const locale = useAppStore((s) => s.locale)
+  const weekdays = React.useMemo(() => getWeekdayNames(locale), [locale])
   const liveSpend = useDailySpend(month)
   const budget = useActiveBudget(month)
   const dailySpend = dailySpendOverride ?? liveSpend
@@ -216,7 +222,7 @@ export function HeatmapCalendar({
           marginBottom: '2px',
         }}
       >
-        {WEEKDAYS.map((d) => (
+        {weekdays.map((d) => (
           <div
             key={d}
             style={{

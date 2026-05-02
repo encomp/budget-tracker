@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { ChevronLeft, Pencil, Trash2, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useLiveRules, db } from '../lib/db'
 import { useMonthCategories } from '../hooks/useMonthCategories'
 import { useBreakpoint } from '../hooks/useBreakpoint'
@@ -13,6 +14,7 @@ import { normalize } from '../lib/csv/categorize'
 import type { BpCsvCategoryMap } from '../types'
 
 export default function ImportRules() {
+  const { t } = useTranslation()
   const activeView = useAppStore((s) => s.activeView)
   const setActiveView = useAppStore((s) => s.setActiveView)
   const activeMonth = useAppStore((s) => s.activeMonth)
@@ -60,9 +62,9 @@ export default function ImportRules() {
     setUndoTimer(prev => { if (prev) clearTimeout(prev); return timer })
 
     showToast(
-      `Deleted ${keys.length} rule${keys.length > 1 ? 's' : ''}.`,
+      keys.length === 1 ? t('importRules.deletedOne') : t('importRules.deletedMany', { count: keys.length }),
       'info',
-      { label: 'Undo', onClick: handleUndo }
+      { label: t('common.undo'), onClick: handleUndo }
     )
   }
 
@@ -71,7 +73,7 @@ export default function ImportRules() {
     await db.csvCategoryMap.bulkPut(pendingUndo)
     setPendingUndo(null)
     if (undoTimer) clearTimeout(undoTimer)
-    showToast('Rules restored.', 'success')
+    showToast(t('importRules.restored'), 'success')
   }
 
   function handleSingleDeleteClick(key: string) {
@@ -446,11 +448,11 @@ export default function ImportRules() {
           </button>
           <div>
             <h1 style={{ fontFamily: 'var(--bp-font-ui)', fontSize: isMobile ? '18px' : '22px', fontWeight: 700, color: 'var(--bp-text-primary)', margin: 0 }}>
-              Import Rules
+              {t('importRules.title')}
             </h1>
             {!isMobile && (
               <p style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-muted)', margin: '2px 0 0' }}>
-                Manage category rules applied during CSV import
+                {t('importRules.subtitle')}
               </p>
             )}
           </div>
@@ -462,7 +464,7 @@ export default function ImportRules() {
           data-testid="import-rules-add-button"
           onClick={() => { setAddForm({ keyword: '', categoryId: '' }); setEditingKey(null) }}
         >
-          {isMobile ? 'Add' : 'Add Rule'}
+          {isMobile ? t('common.add') : t('importRules.addRule')}
         </BpButton>
       </div>
 
@@ -470,7 +472,7 @@ export default function ImportRules() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: '180px' }}>
           <BpInput
-            placeholder="Search rules…"
+            placeholder={t('importRules.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             data-testid="import-rules-search"
@@ -478,7 +480,7 @@ export default function ImportRules() {
         </div>
         {selected.size > 0 && (
           <BpButton variant="danger" size="sm" icon={<Trash2 size={14} />} onClick={handleBulkDelete} data-testid="import-rules-bulk-delete">
-            Delete {selected.size}
+            {t('importRules.deleteN_other', { count: selected.size })}
           </BpButton>
         )}
         {selectionMode && selected.size === 0 && (
@@ -492,15 +494,15 @@ export default function ImportRules() {
       {rules.length === 0 && addForm === null ? (
         <div data-testid="import-rules-empty-state">
           <BpEmptyState
-            heading="No import rules yet"
-            subtext="Rules are created automatically when you assign categories during CSV import, or add one manually."
-            action={{ label: '+ Add your first rule', onClick: () => setAddForm({ keyword: '', categoryId: '' }) }}
+            heading={t('importRules.emptyState')}
+            subtext={t('importRules.emptyStateHint')}
+            action={{ label: t('importRules.addFirstRule'), onClick: () => setAddForm({ keyword: '', categoryId: '' }) }}
           />
         </div>
       ) : filtered.length === 0 && search && addForm === null ? (
         <BpEmptyState
-          heading={`No rules matching "${search}"`}
-          subtext="Try a different keyword."
+          heading={t('importRules.noSearchResults', { term: search })}
+          subtext={t('importRules.noSearchResultsHint')}
         />
       ) : isMobile ? (
         renderMobileCards()
@@ -512,7 +514,7 @@ export default function ImportRules() {
       {isMobile && selectionMode && selected.size > 0 && (
         <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: 'var(--bp-bg-surface)', borderTop: '1px solid var(--bp-border)', padding: '12px 16px', display: 'flex', gap: '8px', zIndex: 50, transform: 'translateY(0)', transition: 'transform 200ms ease' }}>
           <BpButton variant="danger" onClick={handleBulkDelete} style={{ flex: 1 }}>
-            Delete {selected.size} rule{selected.size > 1 ? 's' : ''}
+            {selected.size === 1 ? t('importRules.deleteN_one') : t('importRules.deleteN_other', { count: selected.size })}
           </BpButton>
           <BpButton variant="ghost" onClick={() => { setSelectionMode(false); setSelected(new Set()) }}>
             Cancel
