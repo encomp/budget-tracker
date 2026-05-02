@@ -43,6 +43,10 @@
   --bp-motion-intensity: 1;
   --bp-sidebar-width-full: 240px;
   --bp-sidebar-width-rail: 64px;
+  --bp-icon-stroke: 2;
+  --bp-icon-size-sm: 16px;
+  --bp-icon-size-md: 20px;
+  --bp-icon-size-lg: 24px;
 }
 
 html, body, #root {

@@ -69,6 +69,7 @@ export interface BpTheme {
   description: string
   version: string
   tokens: Record<string, string>
+  icons?: Record<string, string>   // slot name → raw SVG string (sanitized on validate)
 }
 
 export interface BpCsvCategoryMap {
