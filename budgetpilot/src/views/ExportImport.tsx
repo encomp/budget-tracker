@@ -77,16 +77,26 @@ export default function ExportImport() {
         return
       }
 
-      const data = result.data
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data = result.data as any
       const preview: { tableName: string; rowCount: number }[] = []
 
-      if (data.tables) {
+      // Dexie format: { data: { tables: [{ name, rowCount, rows }] } }
+      if (Array.isArray(data?.data?.tables)) {
+        for (const t of data.data.tables) {
+          preview.push({ tableName: t.name, rowCount: t.rowCount ?? t.rows?.length ?? 0 })
+        }
+      // Legacy flat format: { tables: [{ name, rowCount }] }
+      } else if (Array.isArray(data?.tables)) {
         for (const t of data.tables) {
           preview.push({ tableName: t.name, rowCount: t.rowCount })
         }
-      } else if (data.data) {
+      // Legacy record format: { data: { tableName: rows[] } }
+      } else if (data?.data && typeof data.data === 'object') {
         for (const [tableName, rows] of Object.entries(data.data)) {
-          preview.push({ tableName, rowCount: (rows as unknown[]).length })
+          if (Array.isArray(rows)) {
+            preview.push({ tableName, rowCount: rows.length })
+          }
         }
       }
 

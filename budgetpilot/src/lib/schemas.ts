@@ -27,16 +27,7 @@ export const ProfileSchema = z.object({
   currency: z.string().min(1, 'Currency symbol is required').max(3),
 })
 
-export const BackupSchema = z.object({
-  formatVersion: z.string().optional(),
-  tables: z.array(
-    z.object({
-      name: z.string(),
-      rowCount: z.number(),
-    })
-  ).optional(),
-  data: z.record(z.string(), z.array(z.unknown())).optional(),
-}).catchall(z.unknown())
+export const BackupSchema = z.object({}).passthrough()
 
 export const ThemeFileSchema = z.object({
   id: z.string(),

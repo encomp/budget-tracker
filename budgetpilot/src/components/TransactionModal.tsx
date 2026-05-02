@@ -125,6 +125,7 @@ export function TransactionModal({
           onClick={() => onOpenChange(false)}
         />
         <div
+          data-testid={testId}
           style={{
             position: 'fixed',
             bottom: 0,
