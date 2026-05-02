@@ -20,7 +20,7 @@ export function DebtSlider({
   currencySymbol = '$',
 }: DebtSliderProps) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div data-testid="debt-slider" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       {label && (
         <span
           style={{

@@ -6,6 +6,7 @@ export interface BpBadgeProps {
   variant?: BpBadgeVariant
   children?: React.ReactNode
   className?: string
+  'data-testid'?: string
 }
 
 const variantStyles: Record<BpBadgeVariant, React.CSSProperties> = {
@@ -23,7 +24,7 @@ const fixedLabels: Partial<Record<BpBadgeVariant, string>> = {
   manual: 'Manual',
 }
 
-export function BpBadge({ variant = 'default', children, className }: BpBadgeProps) {
+export function BpBadge({ variant = 'default', children, className, 'data-testid': testId }: BpBadgeProps) {
   const label = fixedLabels[variant] ?? children
 
   const style: React.CSSProperties = {
@@ -39,7 +40,7 @@ export function BpBadge({ variant = 'default', children, className }: BpBadgePro
   }
 
   return (
-    <span style={style} className={className}>
+    <span style={style} className={className} data-testid={testId}>
       {label}
     </span>
   )

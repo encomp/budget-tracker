@@ -57,12 +57,14 @@ function ThemeCard({
   isRemovable,
   onApply,
   onRemove,
+  applyTestId,
 }: {
   theme: BpTheme
   isActive: boolean
   isRemovable: boolean
   onApply: () => void
   onRemove?: () => void
+  applyTestId?: string
 }) {
   const fontName = extractFontName(theme.tokens['--bp-font-ui'] ?? '') ?? 'System'
 
@@ -145,7 +147,7 @@ function ThemeCard({
       {/* Actions */}
       <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>
         {!isActive && (
-          <BpButton variant="secondary" size="sm" onClick={onApply}>
+          <BpButton variant="secondary" size="sm" onClick={onApply} data-testid={applyTestId}>
             Apply
           </BpButton>
         )}
@@ -193,6 +195,7 @@ function ThemePreviewPanel({
   return (
     <div
       ref={panelRef}
+      data-testid="theme-preview-panel"
       style={{
         border: '1px solid var(--bp-border)',
         borderRadius: 'var(--bp-radius-md)',
@@ -251,7 +254,7 @@ function ThemePreviewPanel({
 
       {/* Three-button footer */}
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-        <BpButton variant="primary" onClick={onSaveAndApply}>
+        <BpButton variant="primary" onClick={onSaveAndApply} data-testid="theme-apply-button">
           Save &amp; Apply
         </BpButton>
         <BpButton variant="secondary" onClick={onSaveToLibrary}>
@@ -412,10 +415,10 @@ export default function Settings() {
       <BpCard padding="md">
         <SectionTitle>Profile</SectionTitle>
         <form onSubmit={handleSubmit(onProfileSave)} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
-          <BpInput label="Name" placeholder="Your name" error={errors.name?.message} {...register('name')} />
-          <BpInput label="Currency Symbol" placeholder="$" maxLength={3} error={errors.currency?.message} {...register('currency')} />
+          <BpInput label="Name" placeholder="Your name" error={errors.name?.message} data-testid="settings-profile-name" {...register('name')} />
+          <BpInput label="Currency Symbol" placeholder="$" maxLength={3} error={errors.currency?.message} data-testid="settings-profile-currency" {...register('currency')} />
           <div>
-            <BpButton variant="primary" size="sm" onClick={handleSubmit(onProfileSave)}>
+            <BpButton variant="primary" size="sm" onClick={handleSubmit(onProfileSave)} data-testid="settings-profile-save">
               Save Profile
             </BpButton>
           </div>
@@ -455,6 +458,7 @@ export default function Settings() {
                 isActive={activeTheme.id === theme.id}
                 isRemovable={false}
                 onApply={() => handleApplyFromGallery(theme)}
+                applyTestId={theme.id === 'midnight' ? 'theme-reset-button' : undefined}
               />
             ))}
           </div>
@@ -485,6 +489,7 @@ export default function Settings() {
         <div style={{ marginTop: '20px' }}>
           <div
             ref={dropZoneRef}
+            data-testid="theme-dropzone"
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
             onClick={() => fileInputRef.current?.click()}
@@ -534,7 +539,7 @@ export default function Settings() {
           <p style={{ fontSize: '13px', color: 'var(--bp-text-secondary)', fontFamily: 'var(--bp-font-ui)', marginBottom: '12px' }}>
             Permanently erase all transactions, budgets, and settings.
           </p>
-          <BpButton variant="danger" onClick={() => setClearConfirmOpen(true)}>
+          <BpButton variant="danger" onClick={() => setClearConfirmOpen(true)} data-testid="danger-clear-data">
             Clear All Data
           </BpButton>
         </div>

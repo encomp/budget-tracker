@@ -11,6 +11,7 @@ export interface BpModalProps {
   children: React.ReactNode
   footer?: React.ReactNode
   size?: 'sm' | 'md' | 'lg'
+  'data-testid'?: string
 }
 
 const sizeMap = { sm: '400px', md: '560px', lg: '720px' }
@@ -41,7 +42,7 @@ function injectModalStyles() {
   modalStyleInjected = true
 }
 
-export function BpModal({ open, onOpenChange, title, description, children, footer, size = 'md' }: BpModalProps) {
+export function BpModal({ open, onOpenChange, title, description, children, footer, size = 'md', 'data-testid': testId }: BpModalProps) {
   React.useEffect(() => {
     injectModalStyles()
     const cfg = getMotionConfig()
@@ -80,7 +81,7 @@ export function BpModal({ open, onOpenChange, title, description, children, foot
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay style={overlayStyle} />
-        <DialogPrimitive.Content style={contentStyle} className="bp-modal-content">
+        <DialogPrimitive.Content style={contentStyle} className="bp-modal-content" data-testid={testId}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
             <div>
               <DialogPrimitive.Title

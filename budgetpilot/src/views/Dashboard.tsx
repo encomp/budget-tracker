@@ -59,17 +59,19 @@ function MetricCard({
   prefix = '$',
   suffix = '',
   color,
+  testId,
 }: {
   label: string
   value: number
   prefix?: string
   suffix?: string
   color: string
+  testId?: string
 }) {
   const isNegative = value < 0
   const displayed = useCountUp(Math.abs(value))
   return (
-    <BpCard padding="md">
+    <BpCard padding="md" data-testid={testId}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <span
           style={{
@@ -83,6 +85,7 @@ function MetricCard({
           {label}
         </span>
         <span
+          data-testid="metric-value"
           style={{
             fontSize: '24px',
             fontFamily: 'var(--bp-font-mono)',
@@ -109,6 +112,7 @@ function MonthPicker({
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
       <button
+        data-testid="month-nav-prev"
         onClick={() => onChange(format(subMonths(date, 1), 'yyyy-MM'))}
         style={navBtnStyle}
         aria-label="Previous month"
@@ -116,6 +120,7 @@ function MonthPicker({
         <ChevronLeft size={16} />
       </button>
       <span
+        data-testid="month-display"
         style={{
           fontFamily: 'var(--bp-font-ui)',
           fontSize: '15px',
@@ -128,6 +133,7 @@ function MonthPicker({
         {label}
       </span>
       <button
+        data-testid="month-nav-next"
         onClick={() => onChange(format(addMonths(date, 1), 'yyyy-MM'))}
         style={navBtnStyle}
         aria-label="Next month"
@@ -439,12 +445,13 @@ export default function Dashboard() {
           gap: '16px',
         }}
       >
-        <MetricCard label="Income" value={totals.totalIncome} color="var(--bp-positive)" />
-        <MetricCard label="Expenses" value={totals.totalExpenses} color="var(--bp-danger)" />
+        <MetricCard label="Income" value={totals.totalIncome} color="var(--bp-positive)" testId="metric-income" />
+        <MetricCard label="Expenses" value={totals.totalExpenses} color="var(--bp-danger)" testId="metric-expenses" />
         <MetricCard
           label="Remaining"
           value={totals.remaining}
           color={totals.remaining >= 0 ? 'var(--bp-positive)' : 'var(--bp-danger)'}
+          testId="metric-remaining"
         />
         <MetricCard
           label="Savings Rate"
@@ -452,6 +459,7 @@ export default function Dashboard() {
           prefix=""
           suffix="%"
           color="var(--bp-accent)"
+          testId="metric-savings-rate"
         />
       </div>
 
@@ -819,7 +827,7 @@ export default function Dashboard() {
       )}
 
       {/* Recent transactions */}
-      <BpCard padding="md">
+      <BpCard padding="md" data-testid="recent-transactions">
         <div
           style={{
             ...sectionLabel,

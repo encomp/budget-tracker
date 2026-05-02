@@ -5,11 +5,12 @@ export interface BpCardProps {
   padding?: 'sm' | 'md' | 'lg'
   hoverable?: boolean
   className?: string
+  'data-testid'?: string
 }
 
 const paddingMap = { sm: '12px', md: '20px', lg: '28px' }
 
-export function BpCard({ children, padding = 'md', hoverable = false, className }: BpCardProps) {
+export function BpCard({ children, padding = 'md', hoverable = false, className, 'data-testid': testId }: BpCardProps) {
   const [hovered, setHovered] = React.useState(false)
 
   const style: React.CSSProperties = {
@@ -25,6 +26,7 @@ export function BpCard({ children, padding = 'md', hoverable = false, className 
     <div
       style={style}
       className={className}
+      data-testid={testId}
       onMouseEnter={() => hoverable && setHovered(true)}
       onMouseLeave={() => hoverable && setHovered(false)}
     >

@@ -14,6 +14,7 @@ export interface BpEmptyStateProps {
 export function BpEmptyState({ icon, heading, subtext, action }: BpEmptyStateProps) {
   return (
     <div
+      data-testid="empty-state"
       style={{
         display: 'flex',
         flexDirection: 'column',

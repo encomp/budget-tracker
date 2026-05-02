@@ -306,10 +306,10 @@ export function TransactionModal({
   // Desktop/tablet modal
   const footer = (
     <>
-      <BpButton variant="ghost" onClick={() => onOpenChange(false)}>
+      <BpButton variant="ghost" onClick={() => onOpenChange(false)} data-testid="txn-cancel">
         Cancel
       </BpButton>
-      <BpButton variant="primary" loading={saving} onClick={handleSubmit(onSubmit)}>
+      <BpButton variant="primary" loading={saving} onClick={handleSubmit(onSubmit)} data-testid="txn-save">
         {saving ? '' : editTransaction ? 'Save Changes' : 'Add Transaction'}
       </BpButton>
     </>
@@ -323,6 +323,7 @@ export function TransactionModal({
         title={editTransaction ? 'Edit Transaction' : 'Add Transaction'}
         size="md"
         footer={footer}
+        data-testid="transaction-modal"
       >
         <form
           onSubmit={handleSubmit(onSubmit)}
@@ -339,6 +340,7 @@ export function TransactionModal({
                     key={t}
                     variant={field.value === t ? 'primary' : 'ghost'}
                     onClick={() => field.onChange(t)}
+                    data-testid={t === 'expense' ? 'txn-type-expense' : 'txn-type-income'}
                   >
                     {t.charAt(0).toUpperCase() + t.slice(1)}
                   </BpButton>
@@ -356,6 +358,7 @@ export function TransactionModal({
             min="0.01"
             placeholder="0.00"
             error={errors.amount?.message}
+            data-testid="txn-amount"
             {...register('amount', { valueAsNumber: true })}
           />
 
@@ -364,6 +367,7 @@ export function TransactionModal({
             label="Date"
             type="date"
             error={errors.date?.message}
+            data-testid="txn-date"
             {...register('date')}
           />
 
@@ -387,6 +391,7 @@ export function TransactionModal({
                   value={field.value}
                   onValueChange={field.onChange}
                   placeholder="Select category..."
+                  data-testid="txn-category"
                 />
               )}
             />
@@ -401,6 +406,7 @@ export function TransactionModal({
           <BpInput
             label="Note (optional)"
             placeholder="What was this for?"
+            data-testid="txn-note"
             {...register('note')}
           />
 

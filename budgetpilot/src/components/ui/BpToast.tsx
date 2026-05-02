@@ -50,9 +50,9 @@ export function BpToast({ variant, message, visible, onDismiss, autoDismissMs = 
   }
 
   return (
-    <div style={style} role="alert">
+    <div style={style} role="alert" data-testid="toast-container">
       {variant === 'bell' && <AnimatedIcon type="BellRing" size={16} />}
-      <span style={{ flex: 1 }}>{message}</span>
+      <span style={{ flex: 1 }} data-testid="toast-message">{message}</span>
       {action && (
         <button
           onClick={() => { action.onClick(); onDismiss() }}

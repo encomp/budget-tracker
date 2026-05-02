@@ -207,7 +207,7 @@ export function HeatmapCalendar({
   }, [])
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
+    <div data-testid="heatmap-calendar" style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
       <div
         style={{
           display: 'grid',
@@ -247,6 +247,7 @@ export function HeatmapCalendar({
             return (
               <div
                 key={colIdx}
+                data-testid={`heatmap-cell-${dateStr}`}
                 style={{
                   aspectRatio: '1',
                   borderRadius: 'var(--bp-radius-sm)',

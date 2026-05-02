@@ -14,9 +14,10 @@ export interface BpSelectProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  'data-testid'?: string
 }
 
-export function BpSelect({ options, value, onValueChange, placeholder, disabled, className }: BpSelectProps) {
+export function BpSelect({ options, value, onValueChange, placeholder, disabled, className, 'data-testid': testId }: BpSelectProps) {
   const triggerStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -47,7 +48,7 @@ export function BpSelect({ options, value, onValueChange, placeholder, disabled,
 
   return (
     <SelectPrimitive.Root value={value} onValueChange={onValueChange} disabled={disabled}>
-      <SelectPrimitive.Trigger style={triggerStyle} className={className}>
+      <SelectPrimitive.Trigger style={triggerStyle} className={className} data-testid={testId}>
         <SelectPrimitive.Value placeholder={placeholder ?? 'Select...'} />
         <SelectPrimitive.Icon>
           <ChevronDown size={14} style={{ color: 'var(--bp-text-muted)', flexShrink: 0 }} />
