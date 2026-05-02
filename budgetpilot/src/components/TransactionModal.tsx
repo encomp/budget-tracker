@@ -12,6 +12,7 @@ import { TransactionSchema, type TransactionFormValues } from '../lib/schemas'
 import { useMonthCategories } from '../hooks/useMonthCategories'
 import { useBreakpoint } from '../hooks/useBreakpoint'
 import { db } from '../lib/db'
+import { normalize } from '../lib/csv/categorize'
 import type { BpTransaction } from '../types'
 
 export interface TransactionModalProps {
@@ -95,6 +96,12 @@ export function TransactionModal({
           ...values,
           importSource: editTransaction.importSource,
         })
+        if (values.categoryId && values.categoryId !== editTransaction.categoryId) {
+          await db.csvCategoryMap.put({
+            normalizedDescription: normalize(editTransaction.note || ''),
+            categoryId: values.categoryId,
+          })
+        }
       } else {
         await db.transactions.add({
           id: crypto.randomUUID(),
