@@ -20,7 +20,17 @@ export function DebtSlider({
   currencySymbol = '$',
 }: DebtSliderProps) {
   return (
-    <div data-testid="debt-slider" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+      {/* Visually hidden input so Playwright can fill via data-testid="debt-slider" */}
+      <input
+        data-testid="debt-slider"
+        type="number"
+        value={value}
+        min={min}
+        max={max}
+        onChange={(e) => onChange(Number(e.target.value) || 0)}
+        style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0.01, overflow: 'hidden' }}
+      />
       {label && (
         <span
           style={{

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { format, addMonths, subMonths, parseISO, differenceInMonths } from 'date-fns'
+import { format, addMonths, subMonths, parseISO, differenceInMonths, differenceInDays } from 'date-fns'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { ResponsivePie } from '@nivo/pie'
@@ -258,6 +258,8 @@ export default function Dashboard() {
   const activeMonth = useAppStore((s) => s.activeMonth)
   const setActiveMonth = useAppStore((s) => s.setActiveMonth)
   const setActiveView = useAppStore((s) => s.setActiveView)
+  const backupReminderShown = useAppStore((s) => s.backupReminderShown)
+  const setBackupReminderShown = useAppStore((s) => s.setBackupReminderShown)
   const breakpoint = useBreakpoint()
   const isMobile = breakpoint === 'mobile'
 
@@ -278,8 +280,18 @@ export default function Dashboard() {
 
   React.useEffect(() => {
     Settings.get<string>('lastExport').then((val) => {
-      if (val) setLastExport(val)
+      if (val) {
+        setLastExport(val)
+        if (!backupReminderShown) {
+          const daysSince = differenceInDays(new Date(), parseISO(val))
+          if (daysSince > 7) {
+            showToast('Your last backup was over a week ago. Consider exporting.', 'bell')
+            setBackupReminderShown(true)
+          }
+        }
+      }
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Trend chart months
