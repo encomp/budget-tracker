@@ -10,6 +10,8 @@ export interface BpSliderProps {
   variant?: 'standard' | 'premium'
   disabled?: boolean
   className?: string
+  ariaValueText?: (value: number) => string
+  ariaLabel?: string
 }
 
 const sliderCss = `
@@ -65,7 +67,7 @@ function injectSliderStyles() {
   sliderStyleInjected = true
 }
 
-export function BpSlider({ value, min, max, step = 1, onChange, variant = 'standard', disabled, className }: BpSliderProps) {
+export function BpSlider({ value, min, max, step = 1, onChange, variant = 'standard', disabled, className, ariaValueText, ariaLabel }: BpSliderProps) {
   React.useEffect(() => { injectSliderStyles() }, [])
 
   const cls = `${variant === 'premium' ? 'bp-slider-premium' : 'bp-slider-standard'} ${className ?? ''}`
@@ -84,7 +86,12 @@ export function BpSlider({ value, min, max, step = 1, onChange, variant = 'stand
       <SliderPrimitive.Track data-slot="slider-track" className="relative grow overflow-hidden rounded-full data-horizontal:h-full data-horizontal:w-full">
         <SliderPrimitive.Range data-slot="slider-range" className="absolute data-horizontal:h-full" />
       </SliderPrimitive.Track>
-      <SliderPrimitive.Thumb data-slot="slider-thumb" className="block shrink-0" />
+      <SliderPrimitive.Thumb
+        data-slot="slider-thumb"
+        className="block shrink-0"
+        aria-valuetext={ariaValueText ? ariaValueText(value) : undefined}
+        aria-label={ariaLabel}
+      />
     </SliderPrimitive.Root>
   )
 }

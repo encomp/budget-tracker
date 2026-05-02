@@ -650,7 +650,7 @@ export default function Import() {
           <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {/* Conflict warning — auto-shows when conflicts detected */}
             {ruleConflicts.length > 0 && (
-              <div data-testid="import-conflict-panel" style={{ background: 'var(--bp-bg-surface-alt)', border: '1px solid var(--bp-warning)', borderRadius: 'var(--bp-radius-md)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div data-testid="import-conflict-panel" role="alert" aria-live="assertive" style={{ background: 'var(--bp-bg-surface-alt)', border: '1px solid var(--bp-warning)', borderRadius: 'var(--bp-radius-md)', padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-warning)', fontWeight: 600 }}>
                   ⚠ {ruleConflicts.length} rule conflict{ruleConflicts.length > 1 ? 's' : ''} detected: {ruleConflicts.map(k => `"${k}"`).join(', ')}
                 </div>
@@ -666,7 +666,7 @@ export default function Import() {
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'stretch' : 'space-between', gap: '8px', flexWrap: 'wrap' }}>
               {rulesToSaveCount > 0 && ruleConflicts.length === 0 && (
-                <span data-testid="import-rule-count-summary" style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-muted)' }}>
+                <span data-testid="import-rule-count-summary" aria-live="polite" aria-atomic="true" style={{ fontFamily: 'var(--bp-font-ui)', fontSize: '13px', color: 'var(--bp-text-muted)' }}>
                   {preview.length} transactions · {rulesToSaveCount} rule{rulesToSaveCount > 1 ? 's' : ''} will be saved
                 </span>
               )}

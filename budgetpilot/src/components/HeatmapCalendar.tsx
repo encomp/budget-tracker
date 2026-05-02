@@ -212,9 +212,24 @@ export function HeatmapCalendar({
     }
   }, [])
 
+  const { t } = useTranslation()
+
+  // Compute summary data for sr-only paragraph
+  const monthDate2 = parseISO(`${month}-01`)
+  const monthLabel = format(monthDate2, 'MMMM yyyy')
+  const totalSpend = Object.values(dailySpend).reduce((sum, v) => sum + v, 0)
+  const highestEntry = Object.entries(dailySpend).sort(([, a], [, b]) => b - a)[0]
+  const highestDay = highestEntry ? `${highestEntry[0]} ($${highestEntry[1].toFixed(2)})` : t('dashboard.noSpending')
+
   return (
-    <div data-testid="heatmap-calendar" style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
+    <div
+      data-testid="heatmap-calendar"
+      role="grid"
+      aria-label={t('dashboard.heatmapDescription')}
+      style={{ display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}
+    >
       <div
+        role="row"
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
@@ -225,6 +240,8 @@ export function HeatmapCalendar({
         {weekdays.map((d) => (
           <div
             key={d}
+            role="columnheader"
+            aria-label={d}
             style={{
               textAlign: 'center',
               fontSize: '10px',
@@ -232,7 +249,7 @@ export function HeatmapCalendar({
               fontFamily: 'var(--bp-font-ui)',
             }}
           >
-            {d}
+            <span aria-hidden="true">{d}</span>
           </div>
         ))}
       </div>
@@ -240,20 +257,27 @@ export function HeatmapCalendar({
       {Array.from({ length: Math.ceil(cells.length / 7) }, (_, rowIdx) => (
         <div
           key={rowIdx}
+          role="row"
           style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '4px' }}
         >
           {cells.slice(rowIdx * 7, rowIdx * 7 + 7).map((day, colIdx) => {
             if (!day) {
-              return <div key={colIdx} style={{ aspectRatio: '1' }} />
+              return <div key={colIdx} role="gridcell" aria-hidden="true" style={{ aspectRatio: '1' }} />
             }
             const dateStr = format(day, 'yyyy-MM-dd')
             const spend = dailySpend[dateStr] ?? 0
             const level = getHeatLevel(spend, dailyBudget)
+            const cellLabel = spend === 0
+              ? t('dashboard.cellNoSpending', { date: dateStr })
+              : t('dashboard.cellSpending', { date: dateStr, amount: `$${spend.toFixed(2)}`, status: level })
 
             return (
               <div
                 key={colIdx}
+                role="gridcell"
+                tabIndex={-1}
                 data-testid={`heatmap-cell-${dateStr}`}
+                aria-label={cellLabel}
                 style={{
                   aspectRatio: '1',
                   borderRadius: 'var(--bp-radius-sm)',
@@ -272,6 +296,14 @@ export function HeatmapCalendar({
           })}
         </div>
       ))}
+
+      <p className="sr-only">
+        {t('dashboard.heatmapSummary', {
+          month: monthLabel,
+          total: `$${totalSpend.toFixed(2)}`,
+          highestDay,
+        })}
+      </p>
 
       {tooltip && <DayTooltip data={tooltip} />}
     </div>

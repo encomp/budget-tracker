@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useId } from 'react'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import { X } from 'lucide-react'
 import { getMotionConfig } from '../../lib/animation'
@@ -43,6 +44,9 @@ function injectModalStyles() {
 }
 
 export function BpModal({ open, onOpenChange, title, description, children, footer, size = 'md', 'data-testid': testId }: BpModalProps) {
+  const titleId = useId()
+  const descId = useId()
+
   React.useEffect(() => {
     injectModalStyles()
     const cfg = getMotionConfig()
@@ -81,16 +85,18 @@ export function BpModal({ open, onOpenChange, title, description, children, foot
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay style={overlayStyle} />
-        <DialogPrimitive.Content style={contentStyle} className="bp-modal-content" data-testid={testId}>
+        <DialogPrimitive.Content style={contentStyle} className="bp-modal-content" data-testid={testId} aria-labelledby={titleId} aria-describedby={description ? descId : undefined}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
             <div>
               <DialogPrimitive.Title
+                id={titleId}
                 style={{ color: 'var(--bp-text-primary)', fontFamily: 'var(--bp-font-ui)', fontSize: '18px', fontWeight: 600, margin: 0 }}
               >
                 {title}
               </DialogPrimitive.Title>
               {description && (
                 <DialogPrimitive.Description
+                  id={descId}
                   style={{ color: 'var(--bp-text-secondary)', fontFamily: 'var(--bp-font-ui)', fontSize: '14px', marginTop: '4px' }}
                 >
                   {description}

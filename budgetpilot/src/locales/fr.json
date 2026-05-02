@@ -26,7 +26,9 @@
     "budget": "Budget",
     "debts": "Dettes",
     "settings": "Paramètres",
-    "exportImport": "Exporter / Importer"
+    "exportImport": "Exporter / Importer",
+    "collapseSidebar": "Réduire la barre latérale",
+    "expandSidebar": "Développer la barre latérale"
   },
   "errors": {
     "required": "Ce champ est obligatoire",
@@ -44,7 +46,11 @@
   "theme": {
     "contrastWarning": "⚠ Contraste faible dans {{count}} paire(s) de couleurs. Peut être difficile à lire.",
     "contrastWarningDetail": "{{pair}}: {{ratio}}:1 (minimum {{threshold}}:1)",
-    "contrastWarningStillApply": "Vous pouvez tout de même appliquer ce thème."
+    "contrastWarningStillApply": "Vous pouvez tout de même appliquer ce thème.",
+    "applyNamed": "Appliquer le thème {{name}}",
+    "removeNamed": "Supprimer le thème {{name}}",
+    "saveAndApplyNamed": "Enregistrer et appliquer le thème {{name}}",
+    "saveToLibraryNamed": "Enregistrer le thème {{name}} dans la bibliothèque"
   },
   "components": {
     "loading": "Chargement…",
@@ -52,7 +58,8 @@
     "progressBar": {
       "overLimit": "Limite dépassée",
       "approaching": "Approche de la limite",
-      "healthy": "Dans le budget"
+      "healthy": "Dans le budget",
+      "label": "{{value}}% du budget utilisé"
     },
     "confirmDialog": {
       "defaultTitle": "Êtes-vous sûr ?",
@@ -72,7 +79,14 @@
     "lastExport": "Dernière exportation",
     "neverExported": "Jamais exporté",
     "heatmapTitle": "Carte des dépenses",
-    "spendingByCategory": "Dépenses par catégorie"
+    "spendingByCategory": "Dépenses par catégorie",
+    "previousMonth": "Mois précédent",
+    "nextMonth": "Mois suivant",
+    "heatmapDescription": "Calendrier montrant l'intensité des dépenses quotidiennes",
+    "cellNoSpending": "{{date}} : Aucune dépense",
+    "cellSpending": "{{date}} : {{amount}}, {{status}}",
+    "heatmapSummary": "Total de {{month}} : {{total}}. Jour le plus élevé : {{highestDay}}",
+    "noSpending": "Aucune dépense enregistrée"
   },
   "transactions": {
     "title": "Transactions",
@@ -178,7 +192,9 @@
     "deletedMany": "{{count}} règles supprimées. [Annuler]",
     "restored": "Règles restaurées.",
     "deleteN_one": "Supprimer 1 règle",
-    "deleteN_other": "Supprimer {{count}} règles"
+    "deleteN_other": "Supprimer {{count}} règles",
+    "selectAll": "Sélectionner toutes les règles",
+    "selectRule": "Sélectionner la règle : {{keyword}}"
   },
   "exportImport": {
     "title": "Exporter / Importer",
@@ -208,5 +224,9 @@
     "allocationTitle": "Répartition du budget",
     "step3Body": "Votre tableau de bord est prêt. Le thème Midnight est appliqué. Téléchargez des thèmes personnalisés dans les paramètres.",
     "getStarted": "Commencer"
+  },
+  "a11y": {
+    "actions": "Actions",
+    "select": "Sélectionner"
   }
 }
