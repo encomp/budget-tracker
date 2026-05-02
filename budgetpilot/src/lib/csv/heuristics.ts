@@ -52,7 +52,7 @@ export function heuristicMap(
       heuristic.headerPatterns.some(p => p.test(h))
     )
     if (matchedIdx !== -1) {
-      mapping[field as keyof HeuristicMapping] = headers[matchedIdx]
+      (mapping as Record<string, string>)[field] = headers[matchedIdx]
       continue
     }
     if (heuristic.valuePattern) {
@@ -60,7 +60,7 @@ export function heuristicMap(
         sampleMatches(h, sampleRows, heuristic.valuePattern!)
       )
       if (sampledHeader) {
-        mapping[field as keyof HeuristicMapping] = sampledHeader
+        (mapping as Record<string, string>)[field] = sampledHeader
       }
     }
   }

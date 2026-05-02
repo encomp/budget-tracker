@@ -4,7 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { ResponsivePie } from '@nivo/pie'
 import { ResponsiveBar } from '@nivo/bar'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion } from 'motion/react'
 import { useAppStore } from '../store/useAppStore'
 import { useMonthlyTotals } from '../hooks/useMonthlyTotals'
 import { useRecentTransactions } from '../hooks/useRecentTransactions'
@@ -15,6 +15,7 @@ import { useMultiMonthTotals, buildMonthRange } from '../hooks/useMultiMonthTota
 import { useAllCategorySpend } from '../hooks/useAllCategorySpend'
 import { HeatmapCalendar } from '../components/HeatmapCalendar'
 import { TransactionModal } from '../components/TransactionModal'
+import { BpButton } from '../components/ui/BpButton'
 import { BpCard } from '../components/ui/BpCard'
 import { BpBadge } from '../components/ui/BpBadge'
 import { BpConfirmDialog } from '../components/ui/BpConfirmDialog'
@@ -373,7 +374,6 @@ export default function Dashboard() {
   }, [allCategorySpend, budgetCatMap, catMap, isMobile])
 
   const hasBudgetCategories = (budget?.categories?.length ?? 0) > 0
-  const budgetChartHeight = Math.max(120, budgetBarData.length * 44)
 
   const displayedTxns = React.useMemo(
     () =>

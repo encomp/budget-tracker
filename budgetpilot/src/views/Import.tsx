@@ -67,13 +67,6 @@ function Stepper({ stage }: { stage: Stage }) {
   )
 }
 
-function normalizeDate(raw: string): string {
-  const parts = raw.trim().split(/[-\/]/)
-  if (parts.length !== 3) return raw
-  const [a, b, c] = parts
-  if (a.length === 4) return `${a}-${b.padStart(2, '0')}-${c.padStart(2, '0')}`
-  return `${c}-${a.padStart(2, '0')}-${b.padStart(2, '0')}`
-}
 
 const REQUIRED_FIELDS: (keyof HeuristicMapping)[] = ['date', 'amount', 'description']
 
@@ -342,7 +335,7 @@ export default function Import() {
                   </div>
                   <BpSelect
                     options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
-                    value={mapping[field] ?? ''}
+                    value={(mapping[field] as string | undefined) ?? ''}
                     onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
                   />
                 </div>
@@ -368,7 +361,7 @@ export default function Import() {
                     <td style={tdStyle}>
                       <BpSelect
                         options={parsed.headers.map((h) => ({ value: h, label: h }))} placeholder="Select column…"
-                        value={mapping[field] ?? ''}
+                        value={(mapping[field] as string | undefined) ?? ''}
                         onValueChange={(v) => setMapping((prev) => ({ ...prev, [field]: v }))}
                       />
                     </td>

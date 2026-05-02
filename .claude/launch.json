@@ -1,0 +1,19 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "budgetpilot-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "/Users/edgarrico/budget-tracker/budgetpilot",
+      "port": 5173
+    },
+    {
+      "name": "budgetpilot-storybook",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "storybook"],
+      "cwd": "/Users/edgarrico/budget-tracker/budgetpilot",
+      "port": 6006
+    }
+  ]
+}

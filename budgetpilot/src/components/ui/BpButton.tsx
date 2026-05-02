@@ -14,6 +14,7 @@ export interface BpButtonProps {
   disabled?: boolean
   className?: string
   type?: 'button' | 'submit' | 'reset'
+  style?: React.CSSProperties
   'data-testid'?: string
 }
 
@@ -56,6 +57,7 @@ export function BpButton({
   disabled,
   className,
   type = 'button',
+  style: styleProp,
   'data-testid': testId,
 }: BpButtonProps) {
   const [hovered, setHovered] = React.useState(false)
@@ -75,6 +77,7 @@ export function BpButton({
     ...variantStyles[variant],
     ...sizeStyles[size],
     ...hoverOverlay,
+    ...styleProp,
     display: 'inline-flex',
     alignItems: 'center',
     gap: '6px',
