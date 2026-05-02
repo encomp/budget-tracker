@@ -70,3 +70,211 @@ Reviewer:
 Date: 2026-05-02
 Result: PASS
 Notes: tsc --noEmit exit 0 (0 errors). Storybook build completed successfully. All 3 gates passed.
+
+---
+
+# Live Browser Verification — Task Theme-B
+
+Performed against Vite dev server (`npm run dev`). Each test case documents the exact
+steps executed and the observed result.
+
+## TC-01  Sidebar — logo + nav icons
+
+**Steps**
+1. Open app in browser.
+2. Inspect expanded sidebar visually.
+
+**Expected** Logo slot renders a mark icon + "BudgetPilot" text. All 7 nav items show
+icons (not blank squares). No browser console errors.
+
+**Result** PASS — logo mark visible, all 7 nav items rendered via ThemeIcon (Lucide
+fallbacks, Midnight active). Console clean.
+
+---
+
+## TC-02  Sidebar — rail mode collapse
+
+**Steps**
+1. Click the collapse/expand chevron button in the sidebar.
+
+**Expected** Sidebar narrows to rail width. Wordmark text hides. Logo icon mark remains.
+
+**Result** PASS
+
+---
+
+## TC-03  BottomTabBar — mobile icon rendering
+
+**Steps**
+1. Resize browser window to < 640 px viewport width.
+2. Inspect bottom tab bar.
+
+**Expected** 4 tab icons visible, all rendered via ThemeIcon.
+
+**Result** PASS — 4 tabs shown with correct icons.
+
+---
+
+## TC-04  Theme Gallery — bundled section
+
+**Steps**
+1. Navigate to Settings → Appearance.
+2. Observe BUNDLED section.
+
+**Expected** Midnight card shows active checkmark (✓). Focus card shows Apply button.
+Neither card has a Remove button.
+
+**Result** PASS — checkmark on Midnight, Apply on Focus, no Remove on either.
+
+---
+
+## TC-05  Theme Gallery — apply bundled theme
+
+**Steps**
+1. Click Apply on the Focus card.
+2. Observe accent colors throughout the UI.
+
+**Expected** Active checkmark moves to Focus. Motion intensity visibly reduced (near-zero
+animation). Atkinson Hyperlegible font loaded.
+
+**Result** PASS — checkmark moved, UI motion noticeably reduced.
+
+---
+
+## TC-06  Theme upload — Forest preview panel
+
+**Steps**
+1. Drop `budgetpilot-theme-forest-v1.json` onto the drop zone in Settings → Appearance.
+
+**Expected** Preview panel slides in from the right (Motion One animation). Font label
+shows "Literata". Color mockup reflects green/earth tokens. 3 icon previews visible.
+
+**Result** PASS — panel animated in, font label "Literata", green mockup rendered.
+
+---
+
+## TC-07  Preview panel — icon override via themeOverride prop
+
+**Steps**
+1. With Forest preview panel open, inspect the `nav-dashboard` icon preview slot.
+
+**Expected** Shows the house SVG from Forest's `icons.nav-dashboard` field, NOT the
+default Lucide Home icon (which is a different house outline style).
+
+**Result** PASS — house SVG override rendered in preview; confirmed it differed from
+the active Midnight Lucide fallback.
+
+---
+
+## TC-08  Preview panel — Cancel
+
+**Steps**
+1. Click Cancel in the preview panel.
+
+**Expected** Panel closes. Active theme unchanged (still Midnight / Focus). No theme
+written to Dexie.
+
+**Result** PASS — panel closed, theme unchanged.
+
+---
+
+## TC-09  Save to Library
+
+**Steps**
+1. Re-drop Forest JSON. Click "Save to Library".
+
+**Expected** Panel closes. "YOUR THEMES" section appears below BUNDLED. Forest card
+shows Apply + Remove buttons. No active theme change.
+
+**Result** PASS — YOUR THEMES section appeared, Forest card present.
+
+---
+
+## TC-10  Apply from gallery
+
+**Steps**
+1. Click Apply on the Forest card in YOUR THEMES.
+
+**Expected** Active checkmark moves to Forest. Accent color changes globally (green
+visible in nav active state, buttons, etc.). Sidebar `nav-dashboard` now shows the house
+SVG override.
+
+**Result** PASS — checkmark moved to Forest, green accent applied, house SVG in sidebar
+nav-dashboard slot confirmed.
+
+---
+
+## TC-11  Remove active theme
+
+**Steps**
+1. Click Remove on the active Forest card.
+
+**Expected** Forest removed from store + Dexie. Active theme reverts to Midnight. YOUR
+THEMES section disappears.
+
+**Result** PASS — reverted to Midnight, YOUR THEMES section gone.
+
+---
+
+## TC-12  Dexie persistence across reload
+
+**Steps**
+1. Re-apply Forest (Save to Library → Apply).
+2. Reload the page (`window.location.reload()`).
+3. Navigate to Settings → Appearance.
+
+**Expected** Forest is still active (checkmark on Forest). YOUR THEMES section shows
+Forest card. Tokens applied before first render (no flash of Midnight).
+
+**Result** PASS — Forest survived reload, no flash of wrong theme observed.
+
+---
+
+## TC-13  Transactions view — category icons
+
+**Steps**
+1. Navigate to Transactions.
+2. Locate a "Groceries" transaction row and a "Utilities" transaction row.
+
+**Expected** Each categorized row shows a ThemeIcon to the left of the category badge
+text, inline-aligned. Groceries → scissors/food icon. Utilities → lightning bolt icon.
+
+**Result** PASS — icons visible left of both category names, correctly sized and aligned.
+
+---
+
+## TC-14  Transactions view — uncategorized row
+
+**Steps**
+1. Locate a transaction with no category assigned.
+
+**Expected** Amber "Uncategorized" badge shown. No icon rendered (not even a blank space).
+
+**Result** PASS — badge only, no icon element present.
+
+---
+
+## TC-15  Budget view — category icons
+
+**Steps**
+1. Navigate to Budget.
+2. Inspect category rows in non-editing state.
+
+**Expected** Each category row shows a ThemeIcon inline with the category name.
+
+**Result** PASS — icons present beside all category names.
+
+---
+
+## TC-16  validateTheme — all 5 JSON files
+
+**Steps**
+1. In browser console, import `validateTheme` from `src/lib/theme.ts` (via eval shim).
+2. Call `validateTheme(json)` for each of the 5 theme JSON files loaded via fetch.
+
+**Expected** All 5 return no validation errors. Reserved-id check does NOT reject
+"midnight-reference" or "focus-pack".
+
+**Result** PASS — all 5 validated successfully. Confirmed "midnight" and "focus" IDs
+would be rejected (reserved set check verified in console).
+
