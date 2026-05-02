@@ -10,6 +10,9 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+
+# Etsy packaging output — build artifact, not source
+etsy-packages/
 *.local
 
 # Editor directories and files
