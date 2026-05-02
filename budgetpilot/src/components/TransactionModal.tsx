@@ -19,6 +19,7 @@ export interface TransactionModalProps {
   onOpenChange: (open: boolean) => void
   activeMonth: string
   editTransaction?: BpTransaction
+  testId?: string
 }
 
 const NUMPAD_KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫']
@@ -28,6 +29,7 @@ export function TransactionModal({
   onOpenChange,
   activeMonth,
   editTransaction,
+  testId,
 }: TransactionModalProps) {
   const breakpoint = useBreakpoint()
   const isMobile = breakpoint === 'mobile'
@@ -323,7 +325,7 @@ export function TransactionModal({
         title={editTransaction ? 'Edit Transaction' : 'Add Transaction'}
         size="md"
         footer={footer}
-        data-testid="transaction-modal"
+        data-testid={testId}
       >
         <form
           onSubmit={handleSubmit(onSubmit)}

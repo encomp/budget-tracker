@@ -488,7 +488,6 @@ export default function Settings() {
         <div style={{ marginTop: '20px' }}>
           <div
             ref={dropZoneRef}
-            data-testid="theme-dropzone"
             onDrop={handleDrop}
             onDragOver={(e) => e.preventDefault()}
             onClick={() => fileInputRef.current?.click()}
@@ -511,6 +510,7 @@ export default function Settings() {
             ref={fileInputRef}
             type="file"
             accept=".json"
+            data-testid="theme-dropzone"
             style={{ display: 'none' }}
             onChange={(e) => {
               const f = e.target.files?.[0]

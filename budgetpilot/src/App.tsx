@@ -108,6 +108,7 @@ export default function App() {
         open={transactionModalOpen}
         onOpenChange={setTransactionModalOpen}
         activeMonth={activeMonth}
+        testId="transaction-modal"
       />
 
       {breakpoint === 'mobile' && <BottomTabBar />}

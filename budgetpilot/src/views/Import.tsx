@@ -443,7 +443,7 @@ export default function Import() {
                       {catName ? (
                         <BpBadge variant="default">{catName}</BpBadge>
                       ) : (
-                        <BpBadge variant="warning">Uncategorized</BpBadge>
+                        <BpBadge variant="warning" data-testid="badge-uncategorized">Uncategorized</BpBadge>
                       )}
                       <BpBadge variant="csv" />
                     </div>
@@ -552,7 +552,7 @@ export default function Import() {
                               {catName ? (
                                 <BpBadge variant="default">{catName}</BpBadge>
                               ) : (
-                                <BpBadge variant="warning">Uncategorized</BpBadge>
+                                <BpBadge variant="warning" data-testid="badge-uncategorized">Uncategorized</BpBadge>
                               )}
                               <BpSelect
                                 options={[{ value: '', label: catName ? 'Change…' : 'Assign…' }, ...categoryOptions]}
