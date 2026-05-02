@@ -1,16 +1,8 @@
 import { useRef } from 'react'
 import { animate } from 'motion/react'
-import {
-  Home,
-  ArrowLeftRight,
-  Upload,
-  PieChart,
-  CreditCard,
-  Settings,
-  Download,
-  ChevronRight,
-} from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
+import { ThemeIcon } from './ThemeIcon'
 import type { ViewName } from '../types'
 import type { Breakpoint } from '../hooks/useBreakpoint'
 import { getMotionConfig } from '../lib/animation'
@@ -18,17 +10,17 @@ import { getMotionConfig } from '../lib/animation'
 interface NavItem {
   view: ViewName
   label: string
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  slot: string
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { view: 'dashboard', label: 'Dashboard', icon: Home },
-  { view: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
-  { view: 'import', label: 'Import', icon: Upload },
-  { view: 'budget', label: 'Budget', icon: PieChart },
-  { view: 'debts', label: 'Debts', icon: CreditCard },
-  { view: 'settings', label: 'Settings', icon: Settings },
-  { view: 'export-import', label: 'Export/Import', icon: Download },
+  { view: 'dashboard',    label: 'Dashboard',    slot: 'nav-dashboard' },
+  { view: 'transactions', label: 'Transactions', slot: 'nav-transactions' },
+  { view: 'import',       label: 'Import',       slot: 'nav-import' },
+  { view: 'budget',       label: 'Budget',       slot: 'nav-budget' },
+  { view: 'debts',        label: 'Debts',        slot: 'nav-debts' },
+  { view: 'settings',     label: 'Settings',     slot: 'nav-settings' },
+  { view: 'export-import',label: 'Export/Import',slot: 'nav-export' },
 ]
 
 interface SidebarProps {
@@ -82,6 +74,11 @@ export function Sidebar({ breakpoint }: SidebarProps) {
             zIndex: 10,
           }}
         >
+          {/* Logo mark — rail mode, mark only */}
+          <div style={{ padding: '12px 0 8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <ThemeIcon slot="logo" size={28} style={{ color: 'var(--bp-accent)' }} />
+          </div>
+
           <button
             onClick={toggleExpand}
             aria-label="Expand sidebar"
@@ -101,7 +98,6 @@ export function Sidebar({ breakpoint }: SidebarProps) {
             <ChevronRight size={20} />
           </button>
           {NAV_ITEMS.map(item => {
-            const Icon = item.icon
             const isActive = activeView === item.view
             return (
               <button
@@ -123,7 +119,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
                   marginBottom: '4px',
                 }}
               >
-                <Icon size={20} strokeWidth={1.5} />
+                <ThemeIcon slot={item.slot} size={20} />
               </button>
             )
           })}
@@ -153,14 +149,35 @@ export function Sidebar({ breakpoint }: SidebarProps) {
                 zIndex: 100,
                 display: 'flex',
                 flexDirection: 'column',
-                padding: '1rem 0',
+                padding: '0',
               }}
             >
-              <div style={{ padding: '0.5rem 1rem 1rem', color: 'var(--bp-text-primary)', fontWeight: 600, fontSize: '1.1rem' }}>
-                BudgetPilot
+              {/* Logo area — full overlay mode */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '20px 16px 16px',
+                  borderBottom: '1px solid var(--bp-border)',
+                }}
+              >
+                <ThemeIcon slot="logo" size={28} style={{ color: 'var(--bp-accent)', flexShrink: 0 }} />
+                <span
+                  style={{
+                    fontFamily: 'var(--bp-font-ui)',
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    color: 'var(--bp-accent)',
+                    letterSpacing: '-0.02em',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  BudgetPilot
+                </span>
               </div>
+
               {NAV_ITEMS.map(item => {
-                const Icon = item.icon
                 const isActive = activeView === item.view
                 return (
                   <button
@@ -182,7 +199,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
                       textAlign: 'left',
                     }}
                   >
-                    <Icon size={18} strokeWidth={1.5} />
+                    <ThemeIcon slot={item.slot} size={18} />
                     {item.label}
                   </button>
                 )
@@ -195,6 +212,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
   }
 
   // Desktop — full 240px sidebar
+  const isRail = false
   return (
     <nav
       style={{
@@ -204,14 +222,37 @@ export function Sidebar({ breakpoint }: SidebarProps) {
         borderRight: '1px solid var(--bp-border)',
         display: 'flex',
         flexDirection: 'column',
-        padding: '1rem 0',
+        padding: '0',
       }}
     >
-      <div style={{ padding: '0.5rem 1.25rem 1.5rem', color: 'var(--bp-text-primary)', fontWeight: 600, fontSize: '1.1rem' }}>
-        BudgetPilot
+      {/* Logo area */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          padding: '20px 16px 16px',
+          borderBottom: '1px solid var(--bp-border)',
+        }}
+      >
+        <ThemeIcon slot="logo" size={28} style={{ color: 'var(--bp-accent)', flexShrink: 0 }} />
+        {!isRail && (
+          <span
+            style={{
+              fontFamily: 'var(--bp-font-ui)',
+              fontSize: '16px',
+              fontWeight: 700,
+              color: 'var(--bp-accent)',
+              letterSpacing: '-0.02em',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            BudgetPilot
+          </span>
+        )}
       </div>
+
       {NAV_ITEMS.map(item => {
-        const Icon = item.icon
         const isActive = activeView === item.view
         return (
           <button
@@ -233,7 +274,7 @@ export function Sidebar({ breakpoint }: SidebarProps) {
               textAlign: 'left',
             }}
           >
-            <Icon size={18} strokeWidth={1.5} />
+            <ThemeIcon slot={item.slot} size={18} />
             {item.label}
           </button>
         )

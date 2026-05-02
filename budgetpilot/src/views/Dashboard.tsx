@@ -22,6 +22,8 @@ import { BpEmptyState } from '../components/ui/BpEmptyState'
 import { BpToast, useToast } from '../components/ui/BpToast'
 import { useNivoTheme } from '../components/ui/NivoTheme'
 import { Settings } from '../lib/settings'
+import { applyTheme } from '../lib/theme'
+import { THEME_FOCUS } from '../lib/themes'
 import { db } from '../lib/db'
 import type { BpTransaction, BpCategory } from '../types'
 
@@ -167,6 +169,83 @@ const sectionLabel: React.CSSProperties = {
   letterSpacing: '0.05em',
 }
 
+
+// ─── Reduced Motion Banner ────────────────────────────────────────────────────
+
+function ReducedMotionBanner() {
+  const [visible, setVisible] = React.useState(false)
+  const setActiveTheme = useAppStore((s) => s.setActiveTheme)
+
+  React.useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (!prefersReduced) return
+
+    Settings.get<boolean>('reducedMotionNoticeShown').then((shown) => {
+      if (!shown) setVisible(true)
+    })
+  }, [])
+
+  async function handleApplyFocus() {
+    applyTheme(THEME_FOCUS)
+    setActiveTheme(THEME_FOCUS)
+    await Settings.set('reducedMotionNoticeShown', true)
+    setVisible(false)
+  }
+
+  async function handleDismiss() {
+    await Settings.set('reducedMotionNoticeShown', true)
+    setVisible(false)
+  }
+
+  if (!visible) return null
+
+  return (
+    <div
+      style={{
+        borderLeft: '4px solid var(--bp-accent)',
+        background: 'var(--bp-bg-surface)',
+        border: '1px solid var(--bp-border)',
+        borderRadius: 'var(--bp-radius-md)',
+        padding: '16px 20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        marginBottom: '16px',
+      }}
+    >
+      <div>
+        <div
+          style={{
+            fontFamily: 'var(--bp-font-ui)',
+            fontSize: '14px',
+            fontWeight: 600,
+            color: 'var(--bp-text-primary)',
+            marginBottom: '4px',
+          }}
+        >
+          Your system prefers reduced motion.
+        </div>
+        <div
+          style={{
+            fontFamily: 'var(--bp-font-ui)',
+            fontSize: '13px',
+            color: 'var(--bp-text-secondary)',
+          }}
+        >
+          The Focus theme is built for you — no animations, high contrast, calm by design.
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <BpButton variant="primary" size="sm" onClick={handleApplyFocus}>
+          Try Focus Theme
+        </BpButton>
+        <BpButton variant="ghost" size="sm" onClick={handleDismiss}>
+          Not now
+        </BpButton>
+      </div>
+    </div>
+  )
+}
 
 export default function Dashboard() {
   const activeMonth = useAppStore((s) => s.activeMonth)
@@ -322,6 +401,8 @@ export default function Dashboard() {
         maxWidth: '1400px',
       }}
     >
+      <ReducedMotionBanner />
+
       {/* Header */}
       <div
         style={{

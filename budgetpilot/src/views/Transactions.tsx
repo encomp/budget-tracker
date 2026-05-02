@@ -15,6 +15,8 @@ import { BpConfirmDialog } from '../components/ui/BpConfirmDialog'
 import { BpToast, useToast } from '../components/ui/BpToast'
 import { db } from '../lib/db'
 import { normalize } from '../lib/csv/categorize'
+import { categoryNameToSlot } from '../lib/themeUtils'
+import { ThemeIcon } from '../components/ThemeIcon'
 import type { BpTransaction, BpCategory } from '../types'
 
 export default function Transactions() {
@@ -244,7 +246,14 @@ function SwipeCard({
             {txn.categoryId === null ? (
               <BpBadge variant="warning">Uncategorized</BpBadge>
             ) : catName ? (
-              <BpBadge variant="default">{catName}</BpBadge>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <ThemeIcon
+                  slot={categoryNameToSlot(catName)}
+                  size={14}
+                  style={{ color: 'var(--bp-text-secondary)', flexShrink: 0 }}
+                />
+                <BpBadge variant="default">{catName}</BpBadge>
+              </span>
             ) : null}
             <span style={{ fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)' }}>{txn.date}</span>
           </div>
@@ -307,7 +316,14 @@ function TxnTable({
                   />
                 </div>
               ) : catMap[t.categoryId] ? (
-                <BpBadge variant="default">{catMap[t.categoryId]}</BpBadge>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <ThemeIcon
+                    slot={categoryNameToSlot(catMap[t.categoryId])}
+                    size={14}
+                    style={{ color: 'var(--bp-text-secondary)', flexShrink: 0 }}
+                  />
+                  <BpBadge variant="default">{catMap[t.categoryId]}</BpBadge>
+                </span>
               ) : (
                 <BpBadge variant="muted">Unknown</BpBadge>
               )}

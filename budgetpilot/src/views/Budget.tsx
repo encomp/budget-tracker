@@ -1,6 +1,8 @@
 import * as React from 'react'
 import { format, addMonths, subMonths, parseISO } from 'date-fns'
 import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
+import { categoryNameToSlot } from '../lib/themeUtils'
+import { ThemeIcon } from '../components/ThemeIcon'
 import { useAppStore } from '../store/useAppStore'
 import { useActiveBudget } from '../hooks/useActiveBudget'
 import { useCategorySpend } from '../hooks/useCategorySpend'
@@ -139,10 +141,17 @@ function CategoryRow({
           />
         ) : (
           <span
-            style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: 'var(--bp-text-primary)', fontFamily: 'var(--bp-font-ui)', cursor: 'pointer' }}
+            style={{ flex: 1, display: 'inline-flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
             onClick={() => setEditing(true)}
           >
-            {category.name}
+            <ThemeIcon
+              slot={categoryNameToSlot(category.name)}
+              size={16}
+              style={{ color: 'var(--bp-text-secondary)', flexShrink: 0 }}
+            />
+            <span style={{ fontSize: '13px', fontWeight: 500, color: 'var(--bp-text-primary)', fontFamily: 'var(--bp-font-ui)' }}>
+              {category.name}
+            </span>
           </span>
         )}
         <input

@@ -8,16 +8,22 @@ import { BpButton } from '../components/ui/BpButton'
 import { BpInput } from '../components/ui/BpInput'
 import { BpConfirmDialog } from '../components/ui/BpConfirmDialog'
 import { BpToast, useToast } from '../components/ui/BpToast'
+import { ThemeIcon } from '../components/ThemeIcon'
 import { ProfileSchema, type ProfileFormValues } from '../lib/schemas'
 import { THEME_MIDNIGHT, applyTheme, validateTheme } from '../lib/theme'
+import { BUNDLED_THEMES } from '../lib/themes'
+import { ThemeLibrary } from '../lib/settings'
+import { extractFontName } from '../lib/themeUtils'
 import { getMotionConfig } from '../lib/animation'
 import { Settings as SettingsStore } from '../lib/settings'
 import { ChevronRight } from 'lucide-react'
 import { db } from '../lib/db'
 import type { BpTheme } from '../types'
 
-function SwatchStrip() {
-  const CSS_VARS = [
+// ─── ThemeSwatchStrip ────────────────────────────────────────────────────────
+
+function ThemeSwatchStrip({ theme }: { theme: BpTheme }) {
+  const SWATCH_VARS = [
     '--bp-accent',
     '--bp-positive',
     '--bp-warning',
@@ -25,17 +31,16 @@ function SwatchStrip() {
     '--bp-bg-surface-alt',
   ]
   return (
-    <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-      {CSS_VARS.map((v) => (
+    <div style={{ display: 'flex', gap: '5px' }}>
+      {SWATCH_VARS.map((v) => (
         <div
           key={v}
-          title={v}
           style={{
-            width: '28px',
-            height: '28px',
+            width: '20px',
+            height: '20px',
             borderRadius: '50%',
-            background: `var(${v})`,
-            border: '1px solid var(--bp-border)',
+            background: theme.tokens[v] ?? 'transparent',
+            border: '1px solid rgba(255,255,255,0.1)',
             flexShrink: 0,
           }}
         />
@@ -44,13 +49,127 @@ function SwatchStrip() {
   )
 }
 
+// ─── ThemeCard ───────────────────────────────────────────────────────────────
+
+function ThemeCard({
+  theme,
+  isActive,
+  isRemovable,
+  onApply,
+  onRemove,
+}: {
+  theme: BpTheme
+  isActive: boolean
+  isRemovable: boolean
+  onApply: () => void
+  onRemove?: () => void
+}) {
+  const fontName = extractFontName(theme.tokens['--bp-font-ui'] ?? '') ?? 'System'
+
+  return (
+    <div
+      style={{
+        border: isActive
+          ? '2px solid var(--bp-accent)'
+          : '1px solid var(--bp-border)',
+        borderRadius: 'var(--bp-radius-md)',
+        padding: '14px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        background: isActive ? 'var(--bp-accent-muted)' : 'var(--bp-bg-surface-alt)',
+        position: 'relative',
+        transition:
+          'border-color var(--bp-duration-fast) var(--bp-easing-default), ' +
+          'background var(--bp-duration-fast) var(--bp-easing-default)',
+        minWidth: '160px',
+        flex: '1 1 160px',
+        maxWidth: '220px',
+      }}
+    >
+      {/* Active checkmark */}
+      {isActive && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            width: '18px',
+            height: '18px',
+            borderRadius: '50%',
+            background: 'var(--bp-accent)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+            <path
+              d="M1 4l3 3 5-6"
+              stroke="var(--bp-bg-base)"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+      )}
+
+      {/* Theme name */}
+      <div
+        style={{
+          fontFamily: 'var(--bp-font-ui)',
+          fontSize: '14px',
+          fontWeight: 600,
+          color: 'var(--bp-text-primary)',
+          paddingRight: isActive ? '24px' : '0',
+        }}
+      >
+        {theme.name}
+      </div>
+
+      {/* Swatch strip */}
+      <ThemeSwatchStrip theme={theme} />
+
+      {/* Font name */}
+      <div
+        style={{
+          fontFamily: 'var(--bp-font-ui)',
+          fontSize: '11px',
+          color: 'var(--bp-text-muted)',
+        }}
+      >
+        {fontName}
+      </div>
+
+      {/* Actions */}
+      <div style={{ display: 'flex', gap: '6px', marginTop: '2px' }}>
+        {!isActive && (
+          <BpButton variant="secondary" size="sm" onClick={onApply}>
+            Apply
+          </BpButton>
+        )}
+        {isRemovable && onRemove && (
+          <BpButton variant="ghost" size="sm" onClick={onRemove}>
+            Remove
+          </BpButton>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── ThemePreviewPanel ───────────────────────────────────────────────────────
+
 function ThemePreviewPanel({
   theme,
-  onApply,
+  onSaveToLibrary,
+  onSaveAndApply,
   onCancel,
 }: {
   theme: BpTheme
-  onApply: () => void
+  onSaveToLibrary: () => void
+  onSaveAndApply: () => void
   onCancel: () => void
 }) {
   const panelRef = React.useRef<HTMLDivElement>(null)
@@ -65,6 +184,7 @@ function ThemePreviewPanel({
     )
   }, [])
 
+  const fontName = extractFontName(theme.tokens['--bp-font-ui'] ?? '') ?? 'System font'
   const inlineVars = Object.entries(theme.tokens).reduce<React.CSSProperties>(
     (acc, [k, v]) => ({ ...acc, [k]: v }),
     {}
@@ -96,37 +216,46 @@ function ThemePreviewPanel({
       </div>
 
       {/* Mini mockup rendered with theme tokens applied inline */}
-      <div style={{ ...inlineVars, background: `var(--bp-bg-surface)`, borderRadius: 'var(--bp-radius-md)', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' } as React.CSSProperties}>
-        <div style={{ fontSize: '13px', fontWeight: 600, color: `var(--bp-text-primary)`, fontFamily: `var(--bp-font-ui)` }}>
+      <div style={{ ...inlineVars, background: 'var(--bp-bg-surface)', borderRadius: 'var(--bp-radius-md)', padding: '12px', display: 'flex', flexDirection: 'column', gap: '10px' } as React.CSSProperties}>
+        <div style={{ fontSize: '13px', fontWeight: 600, color: 'var(--bp-text-primary)', fontFamily: 'var(--bp-font-ui)' }}>
           Sample Card
         </div>
-        <div style={{ fontFamily: `var(--bp-font-mono)`, fontSize: '20px', color: `var(--bp-accent)`, fontWeight: 500 }}>
+        <div style={{ fontFamily: 'var(--bp-font-mono)', fontSize: '20px', color: 'var(--bp-accent)', fontWeight: 500 }}>
           $1,800.00
         </div>
-        <div style={{ height: '8px', background: `var(--bp-bg-surface-alt)`, borderRadius: `var(--bp-radius-sm)`, overflow: 'hidden' }}>
-          <div style={{ width: '65%', height: '100%', background: `var(--bp-positive)`, borderRadius: `var(--bp-radius-sm)` }} />
+        <div style={{ height: '8px', background: 'var(--bp-bg-surface-alt)', borderRadius: 'var(--bp-radius-sm)', overflow: 'hidden' }}>
+          <div style={{ width: '65%', height: '100%', background: 'var(--bp-positive)', borderRadius: 'var(--bp-radius-sm)' }} />
         </div>
-        <button
-          style={{
-            background: `var(--bp-accent)`,
-            border: 'none',
-            borderRadius: `var(--bp-radius-md)`,
-            color: '#000',
-            fontFamily: `var(--bp-font-ui)`,
-            fontSize: '13px',
-            padding: '8px 16px',
-            cursor: 'pointer',
-            fontWeight: 500,
-            alignSelf: 'flex-start',
-          }}
-        >
-          Apply Theme
-        </button>
       </div>
 
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <BpButton variant="primary" onClick={onApply}>
-          Apply Theme
+      {/* Font label */}
+      <div style={{ fontSize: '12px', color: 'var(--bp-text-secondary)', fontFamily: 'var(--bp-font-ui)' }}>
+        Typography: <strong>{fontName}</strong>
+      </div>
+
+      {/* Icon slot previews — 3 nav icons rendered with this theme's overrides */}
+      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <span style={{ fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)' }}>
+          Icons:
+        </span>
+        {['nav-dashboard', 'nav-transactions', 'nav-budget'].map((slot) => (
+          <ThemeIcon
+            key={slot}
+            slot={slot}
+            size={18}
+            themeOverride={theme}
+            style={{ color: 'var(--bp-text-secondary)' }}
+          />
+        ))}
+      </div>
+
+      {/* Three-button footer */}
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <BpButton variant="primary" onClick={onSaveAndApply}>
+          Save &amp; Apply
+        </BpButton>
+        <BpButton variant="secondary" onClick={onSaveToLibrary}>
+          Save to Library
         </BpButton>
         <BpButton variant="ghost" onClick={onCancel}>
           Cancel
@@ -135,6 +264,8 @@ function ThemePreviewPanel({
     </div>
   )
 }
+
+// ─── Shared styles ───────────────────────────────────────────────────────────
 
 const settingsRowStyle: React.CSSProperties = {
   width: '100%',
@@ -168,10 +299,15 @@ const settingsRowSubStyle: React.CSSProperties = {
   color: 'var(--bp-text-muted)',
 }
 
+// ─── Settings view ───────────────────────────────────────────────────────────
+
 export default function Settings() {
-  const setActiveTheme = useAppStore((s) => s.setActiveTheme)
   const setActiveView = useAppStore((s) => s.setActiveView)
   const activeTheme = useAppStore((s) => s.activeTheme)
+  const setActiveTheme = useAppStore((s) => s.setActiveTheme)
+  const installedThemes = useAppStore((s) => s.installedThemes)
+  const addInstalledTheme = useAppStore((s) => s.addInstalledTheme)
+  const removeInstalledTheme = useAppStore((s) => s.removeInstalledTheme)
   const { toast, showToast, dismiss } = useToast()
   const [clearConfirmOpen, setClearConfirmOpen] = React.useState(false)
   const [pendingTheme, setPendingTheme] = React.useState<BpTheme | null>(null)
@@ -210,12 +346,12 @@ export default function Settings() {
         const parsed = JSON.parse(e.target?.result as string)
         const validated = validateTheme(parsed)
         if (!validated) {
-          showToast('Invalid theme file. Missing required tokens.', 'error')
+          showToast('Invalid theme file. Missing required tokens or reserved ID.', 'error')
           return
         }
         setPendingTheme(validated)
       } catch {
-        showToast('Invalid theme file. Missing required tokens.', 'error')
+        showToast('Invalid theme file. Missing required tokens or reserved ID.', 'error')
       }
     }
     reader.readAsText(file)
@@ -227,19 +363,38 @@ export default function Settings() {
     if (file) handleThemeFile(file)
   }
 
-  function handleApplyTheme() {
+  async function handleSaveToLibrary() {
     if (!pendingTheme) return
+    await ThemeLibrary.add(pendingTheme)
+    addInstalledTheme(pendingTheme)
+    setPendingTheme(null)
+    showToast(`"${pendingTheme.name}" added to your themes.`, 'success')
+  }
+
+  async function handleSaveAndApply() {
+    if (!pendingTheme) return
+    await ThemeLibrary.add(pendingTheme)
+    addInstalledTheme(pendingTheme)
     applyTheme(pendingTheme)
     setActiveTheme(pendingTheme)
     setPendingTheme(null)
-    showToast(`Theme "${pendingTheme.name}" applied.`, 'success')
+    showToast(`"${pendingTheme.name}" applied.`, 'success')
   }
 
-  function handleResetTheme() {
-    applyTheme(THEME_MIDNIGHT)
-    setActiveTheme(THEME_MIDNIGHT)
-    SettingsStore.delete('activeTheme')
-    showToast('Reset to Midnight theme.', 'info')
+  function handleApplyFromGallery(theme: BpTheme) {
+    applyTheme(theme)
+    setActiveTheme(theme)
+    showToast(`"${theme.name}" applied.`, 'success')
+  }
+
+  async function handleRemoveTheme(theme: BpTheme) {
+    await ThemeLibrary.remove(theme.id)
+    removeInstalledTheme(theme.id)
+    if (activeTheme.id === theme.id) {
+      applyTheme(THEME_MIDNIGHT)
+      setActiveTheme(THEME_MIDNIGHT)
+    }
+    showToast(`"${theme.name}" removed.`, 'info')
   }
 
   async function handleClearData() {
@@ -267,7 +422,7 @@ export default function Settings() {
         </form>
       </BpCard>
 
-      {/* Import Rules */}
+      {/* Data / Import Rules */}
       <BpCard padding="md">
         <SectionTitle>Data</SectionTitle>
         <div style={{ marginTop: '8px' }}>
@@ -286,15 +441,48 @@ export default function Settings() {
       {/* Appearance */}
       <BpCard padding="md">
         <SectionTitle>Appearance</SectionTitle>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-          <div>
-            <div style={{ fontSize: '13px', color: 'var(--bp-text-secondary)', fontFamily: 'var(--bp-font-ui)' }}>
-              Active theme: <strong style={{ color: 'var(--bp-text-primary)' }}>{activeTheme.name}</strong>
-            </div>
-            <SwatchStrip />
-          </div>
 
-          {/* Drop zone */}
+        {/* BUNDLED themes */}
+        <div style={{ marginTop: '16px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+            Bundled
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            {BUNDLED_THEMES.map((theme) => (
+              <ThemeCard
+                key={theme.id}
+                theme={theme}
+                isActive={activeTheme.id === theme.id}
+                isRemovable={false}
+                onApply={() => handleApplyFromGallery(theme)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* YOUR THEMES — only if user has installed themes */}
+        {installedThemes.length > 0 && (
+          <div style={{ marginTop: '20px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--bp-text-muted)', fontFamily: 'var(--bp-font-ui)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '8px' }}>
+              Your Themes
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+              {installedThemes.map((theme) => (
+                <ThemeCard
+                  key={theme.id}
+                  theme={theme}
+                  isActive={activeTheme.id === theme.id}
+                  isRemovable={true}
+                  onApply={() => handleApplyFromGallery(theme)}
+                  onRemove={() => handleRemoveTheme(theme)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Add Theme Pack drop zone */}
+        <div style={{ marginTop: '20px' }}>
           <div
             ref={dropZoneRef}
             onDrop={handleDrop}
@@ -304,7 +492,7 @@ export default function Settings() {
               border: '2px dashed var(--bp-border)',
               borderRadius: 'var(--bp-radius-md)',
               background: 'var(--bp-bg-surface-alt)',
-              padding: '32px',
+              padding: '24px',
               textAlign: 'center',
               cursor: 'pointer',
               color: 'var(--bp-text-muted)',
@@ -313,30 +501,30 @@ export default function Settings() {
               transition: 'border-color var(--bp-duration-fast) var(--bp-easing-default)',
             }}
           >
-            Drop a Theme Pack (.json) or click to browse
+            + Add Theme Pack (.json) — drop or click
           </div>
           <input
             ref={fileInputRef}
             type="file"
             accept=".json"
             style={{ display: 'none' }}
-            onChange={(e) => { const f = e.target.files?.[0]; if (f) handleThemeFile(f) }}
+            onChange={(e) => {
+              const f = e.target.files?.[0]
+              if (f) handleThemeFile(f)
+              e.target.value = ''
+            }}
           />
-
-          {pendingTheme && (
-            <ThemePreviewPanel
-              theme={pendingTheme}
-              onApply={handleApplyTheme}
-              onCancel={() => setPendingTheme(null)}
-            />
-          )}
-
-          <div>
-            <BpButton variant="secondary" size="sm" onClick={handleResetTheme}>
-              Reset to Midnight
-            </BpButton>
-          </div>
         </div>
+
+        {/* Preview panel */}
+        {pendingTheme && (
+          <ThemePreviewPanel
+            theme={pendingTheme}
+            onSaveToLibrary={handleSaveToLibrary}
+            onSaveAndApply={handleSaveAndApply}
+            onCancel={() => setPendingTheme(null)}
+          />
+        )}
       </BpCard>
 
       {/* Danger Zone */}

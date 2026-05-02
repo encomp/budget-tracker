@@ -1,18 +1,18 @@
-import { Home, ArrowLeftRight, PieChart, Settings } from 'lucide-react'
 import { useAppStore } from '../store/useAppStore'
+import { ThemeIcon } from './ThemeIcon'
 import type { ViewName } from '../types'
 
 interface TabItem {
   view: ViewName
   label: string
-  icon: React.ComponentType<{ size?: number; strokeWidth?: number }>
+  slot: string
 }
 
 const TABS: TabItem[] = [
-  { view: 'dashboard', label: 'Home', icon: Home },
-  { view: 'transactions', label: 'Transactions', icon: ArrowLeftRight },
-  { view: 'budget', label: 'Budget', icon: PieChart },
-  { view: 'settings', label: 'Settings', icon: Settings },
+  { view: 'dashboard',    label: 'Home',         slot: 'nav-dashboard' },
+  { view: 'transactions', label: 'Transactions', slot: 'nav-transactions' },
+  { view: 'budget',       label: 'Budget',       slot: 'nav-budget' },
+  { view: 'settings',     label: 'Settings',     slot: 'nav-settings' },
 ]
 
 export function BottomTabBar() {
@@ -35,7 +35,6 @@ export function BottomTabBar() {
       }}
     >
       {TABS.map(tab => {
-        const Icon = tab.icon
         const isActive = activeView === tab.view
         return (
           <button
@@ -56,7 +55,7 @@ export function BottomTabBar() {
               fontSize: '0.65rem',
             }}
           >
-            <Icon size={22} strokeWidth={1.5} />
+            <ThemeIcon slot={tab.slot} size={22} />
             {tab.label}
           </button>
         )
